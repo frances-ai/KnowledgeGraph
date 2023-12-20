@@ -1,3 +1,9 @@
 pandas
 rdflib
 regex
+nltk
+transformers
+bert-extractive-summarizer
+torch
+torchvision
+torchaudio
