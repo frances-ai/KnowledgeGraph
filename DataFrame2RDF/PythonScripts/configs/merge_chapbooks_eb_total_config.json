@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "task_name": "merge_graphs",
+      "inputs": {
+        "graphs_filenames": [
+          "hto_chapbooks_nls.ttl",
+          "hto_eb_total.ttl"
+        ],
+        "results_filenames": {
+          "graph": "hto_total.ttl"
+        }
+      }
+    }
+  ]
+}

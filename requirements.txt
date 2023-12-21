@@ -3,6 +3,7 @@ rdflib
 regex
 nltk
 transformers
+sentence_transformers
 bert-extractive-summarizer
 torch
 torchvision

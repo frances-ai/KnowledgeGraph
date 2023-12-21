@@ -1,0 +1,82 @@
+{
+  "tasks": [
+    {
+      "task_name": "single_source_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframes": [
+          {
+            "agent": "NLS",
+            "filename": "final_eb_1_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_2_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_3_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_4_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_4_5_6_suplement_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_5_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_6_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_7_dataframe"
+          },
+          {
+            "agent": "NLS",
+            "filename": "final_eb_8_dataframe"
+          }
+        ],
+        "results_filenames": {
+          "dataframes_with_uri": "eb_total_dataframe_uris",
+          "graph": "hto_eb_total.ttl"
+        }
+      }
+    },
+    {
+      "task_name": "multiple_source_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframes": [
+          {
+            "agent": "Ash",
+            "filename": "ash_final_eb_1_dataframe_clean_Damon"
+          },
+          {
+            "agent": "NCKP",
+            "filename": "nckp_final_eb_7_dataframe_clean_Damon_with_uris"
+          }
+        ]
+      }
+    },
+    {
+      "task_name": "summary",
+      "inputs": {
+        "results_filenames": {
+          "graph": "hto_total_summary.ttl"
+        }
+      }
+    },
+    {
+      "task_name": "similar_terms",
+      "inputs": {
+        "results_filenames": {
+          "graph": "hto_total_summary_similar.ttl"
+        }
+      }
+    }
+  ]
+}
