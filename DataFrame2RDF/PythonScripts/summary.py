@@ -48,9 +48,13 @@ def summarise_text_abstractive(text):
         chunk = grouped_sentences[index]
         chunk_token_length = len(chunks[index])
         MAX_SUMMARY_LENGTH = 100
+        MIN_LENGTH = 5
+        if chunk_token_length < MIN_LENGTH * 2:
+            continue
         if chunk_token_length < MAX_SUMMARY_LENGTH * 2:
             MAX_SUMMARY_LENGTH = int(chunk_token_length / 2)
-        summary = summarizer(chunk, max_length=MAX_SUMMARY_LENGTH, min_length=5, do_sample=False)
+
+        summary = summarizer(chunk, max_length=MAX_SUMMARY_LENGTH, MIN_LENGTH=5, do_sample=False)
         summaries.append(summary[0]['summary_text'])
     return ' '.join(summaries)
 
