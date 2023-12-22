@@ -54,7 +54,7 @@ def summarise_text_abstractive(text):
         if chunk_token_length < MAX_SUMMARY_LENGTH * 2:
             MAX_SUMMARY_LENGTH = int(chunk_token_length / 2)
 
-        summary = summarizer(chunk, max_length=MAX_SUMMARY_LENGTH, MIN_LENGTH=5, do_sample=False)
+        summary = summarizer(chunk, max_length=MAX_SUMMARY_LENGTH, min_length=MIN_LENGTH, do_sample=False)
         summaries.append(summary[0]['summary_text'])
     return ' '.join(summaries)
 
