@@ -73,13 +73,13 @@ def series2rdf(series_info):
             if editor_date.find("-") != -1:
                 tmpDate = editor_date.split("-")
 
-                birthDate = tmpDate[0]
-                deathDate = tmpDate[1]
+                birthYear = tmpDate[0]
+                deathYear = tmpDate[1]
 
-                if birthDate.isnumeric():
-                    graph.add((editor, SDO.birthDate, Literal(int(birthDate), datatype=XSD.date)))
-                if deathDate.isnumeric():
-                    graph.add((editor, SDO.deathDate, Literal(int(deathDate), datatype=XSD.date)))
+                if birthYear.isnumeric():
+                    graph.add((editor, hto.birthYear, Literal(int(birthYear), datatype=XSD.int)))
+                if deathYear.isnumeric():
+                    graph.add((editor, hto.deathYear, Literal(int(deathYear), datatype=XSD.int)))
             else:
                 print(f"date {editor_date} cannot be parsed!")
 
