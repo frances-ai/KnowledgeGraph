@@ -88,6 +88,7 @@ def dataframe_to_rdf(dataframe, graph, agent_uri, agent, eb_dataset, single_sour
                     term_type = str(df_entry["termType"]) + "TermRecord"
                     term_class_name = get_term_class_name(term_type, hto)
                     if existing_term:
+                        term_id = existing_term.split("/")[-1]
                         term_ref = URIRef(existing_term)
                         # new description, new source
                     else:
