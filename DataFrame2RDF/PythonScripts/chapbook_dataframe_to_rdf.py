@@ -68,25 +68,25 @@ def series2rdf(series_info):
             graph.add((editor, RDF.type, hto.Person))
             graph.add((editor, FOAF.name, Literal(editor_name, datatype=XSD.string)))
 
-        if series_info["editor_date"] != 0:
-            editor_date = str(series_info["editor_date"]).replace("?", "")
-            if editor_date.find("-") != -1:
-                tmpDate = editor_date.split("-")
+            if series_info["editor_date"] != 0:
+                editor_date = str(series_info["editor_date"]).replace("?", "")
+                if editor_date.find("-") != -1:
+                    tmpDate = editor_date.split("-")
 
-                birthYear = tmpDate[0]
-                deathYear = tmpDate[1]
+                    birthYear = tmpDate[0]
+                    deathYear = tmpDate[1]
 
-                if birthYear.isnumeric():
-                    graph.add((editor, hto.birthYear, Literal(int(birthYear), datatype=XSD.int)))
-                if deathYear.isnumeric():
-                    graph.add((editor, hto.deathYear, Literal(int(deathYear), datatype=XSD.int)))
-            else:
-                print(f"date {editor_date} cannot be parsed!")
+                    if birthYear.isnumeric():
+                        graph.add((editor, hto.birthYear, Literal(int(birthYear), datatype=XSD.int)))
+                    if deathYear.isnumeric():
+                        graph.add((editor, hto.deathYear, Literal(int(deathYear), datatype=XSD.int)))
+                else:
+                    print(f"date {editor_date} cannot be parsed!")
 
-        if series_info["termsOfAddress"] != 0:
-            graph.add((editor, hto.termsOfAddress, Literal(series_info["termsOfAddress"], datatype=XSD.string)))
+            if series_info["termsOfAddress"] != 0:
+                graph.add((editor, hto.termsOfAddress, Literal(series_info["termsOfAddress"], datatype=XSD.string)))
 
-        graph.add((series, hto.editor, editor))
+            graph.add((series, hto.editor, editor))
 
     #### Publishers Persons
 
@@ -101,6 +101,8 @@ def series2rdf(series_info):
             if iri_publisher_name != "":
                 publisher = URIRef("https://w3id.org/hto/Person/" + iri_publisher_name)
                 graph.add((publisher, RDF.type, hto.Person))
+                graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
+                graph.add((series, hto.publisher, publisher))
         else:
             iri_publisher_name = ""
             publisher_name = ""
@@ -111,9 +113,8 @@ def series2rdf(series_info):
                     break
             publisher = URIRef("https://w3id.org/hto/Organization/" + iri_publisher_name)
             graph.add((publisher, RDF.type, hto.Organization))
-
-        graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
-        graph.add((series, hto.publisher, publisher))
+            graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
+            graph.add((series, hto.publisher, publisher))
 
         # Creat an instance of publicationActivity
         # publication_activity = URIRef("https://w3id.org/hto/Activity/"+ "publication" + str(series_info["MMSID"]))

@@ -95,22 +95,22 @@ def edition2rdf(edition_info):
     if edition_info["editor"] != 0:
         editor_name = str(edition_info["editor"])
         editor_uri_name = name_to_uri_name(editor_name)
-        if editor_name != "":
-            editor = URIRef("https://w3id.org/hto/Person/" + str(editor_uri_name))
-            graph.add((editor, RDF.type, hto.Person))
-            graph.add((editor, FOAF.name, Literal(editor_name, datatype=XSD.string)))
 
         if edition_info["editor_date"] != 0:
             tmpDate = edition_info["editor_date"].split("-")
             birthYear = int(tmpDate[0])
             deathYear = int(tmpDate[1])
-            graph.add((editor, hto.birthYear, Literal(birthYear, datatype=XSD.int)))
-            graph.add((editor, hto.deathYear, Literal(deathYear, datatype=XSD.int)))
 
-        if edition_info["termsOfAddress"] != 0:
-            graph.add((editor, hto.termsOfAddress, Literal(edition_info["termsOfAddress"], datatype=XSD.string)))
+            if editor_name != "":
+                editor = URIRef("https://w3id.org/hto/Person/" + str(editor_uri_name))
+                graph.add((editor, RDF.type, hto.Person))
+                graph.add((editor, FOAF.name, Literal(editor_name, datatype=XSD.string)))
+                graph.add((editor, hto.birthYear, Literal(birthYear, datatype=XSD.int)))
+                graph.add((editor, hto.deathYear, Literal(deathYear, datatype=XSD.int)))
 
-        graph.add((edition, hto.editor, editor))
+                if edition_info["termsOfAddress"] != 0:
+                    graph.add((editor, hto.termsOfAddress, Literal(edition_info["termsOfAddress"], datatype=XSD.string)))
+                graph.add((edition, hto.editor, editor))
 
     #### Publishers Persons
 
@@ -125,6 +125,8 @@ def edition2rdf(edition_info):
             if iri_publisher_name != "":
                 publisher = URIRef("https://w3id.org/hto/Person/" + iri_publisher_name)
                 graph.add((publisher, RDF.type, hto.Person))
+                graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
+                graph.add((edition, hto.publisher, publisher))
         else:
             iri_publisher_name = ""
             publisher_name = ""
@@ -136,8 +138,8 @@ def edition2rdf(edition_info):
             publisher = URIRef("https://w3id.org/hto/Organization/" + iri_publisher_name)
             graph.add((publisher, RDF.type, hto.Organization))
 
-        graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
-        graph.add((edition, hto.publisher, publisher))
+            graph.add((publisher, FOAF.name, Literal(publisher_name, datatype=XSD.string)))
+            graph.add((edition, hto.publisher, publisher))
 
         # Creat an instance of publicationActivity
         # publication_activity = URIRef("https://w3id.org/hto/Activity/"+ "publication" + str(edition_info["MMSID"]))
