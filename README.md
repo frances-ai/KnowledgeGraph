@@ -1,7 +1,7 @@
 # Knowledge Graphs for Textual Heritage
 
 This repository includes code and sources to create knowledge graphs for digitised textual heritage.
-Knowledge Graphs generated here are based on the [Heritage Text Ontology](https://github.com/frances-ai/HeritageTextOntology).
+Knowledge Graphs generated here are based on the [Heritage Text Ontology](https://w3id.org/hto).
 Note that this repository does not introduce any methods to extract information from the source digital datasets whose formats
 varies, instead, we utilise the dataframes generated from [Information Extraction for frances Project](https://github.com/frances-ai/frances-InformationExtraction).
 
@@ -58,7 +58,7 @@ structure will be:
 └── source_dataframes
 ```
 
-#### Step 4: Create task configuration file. 
+#### Step 4: Create task configuration json file. 
 
 This file will be passed as an argument when we run the `run_tasks.py`, it will 
 tell the program what tasks should execute, what's the inputs and outputs of tasks. So far, we have **implemented 6 tasks executors**:
@@ -78,7 +78,7 @@ has been added to the graph. In this case, it should be handled in the next task
 More details of the tasks can be found [here](DataFrame2RDF/PythonScripts/README.md)
 
 The config file below tells the program to first generate a graph for 7th edition EB from the knowledge project, and then 
-add summaries to the graph.
+add summaries to the graph. More examples can be found [here](DataFrame2RDF/PythonScripts/configs)
 
 ```json
 {
@@ -110,7 +110,7 @@ add summaries to the graph.
 
 #### Step 5: Run the tasks
 
-In command line, navigate to this folder `DataFrame2RDF/PythonScripts`, and then run the python file `run_tasks`.
+In command line, navigate to this folder `DataFrame2RDF/PythonScripts`, and then run the python file `run_tasks.py`.
 ```
 cd DataFrame2RDF/PythonScripts
 python run_tasks.py --config_file=<path_to_your_config_file>
