@@ -116,7 +116,10 @@ cd DataFrame2RDF/PythonScripts
 python run_tasks.py --config_file=<path_to_your_config_file>
 ```
 
-The final graph file can be found `results` folder.
+The final graph file can be found `results` folder. 
+
+We have generated some [knowledge graphs](https://universityofstandrews907-my.sharepoint.com/:f:/g/personal/ly40_st-andrews_ac_uk/ElagHP1K_6JJlE9ybROuuVsBsSV8m849oi-a9OPUS5lWFA?e=jJoRuD)
+
 
 #### Explore the graph using [this notebook](KnowledgeExploration.ipynb)
 
