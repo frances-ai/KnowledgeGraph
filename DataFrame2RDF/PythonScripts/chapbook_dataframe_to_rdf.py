@@ -133,7 +133,7 @@ def series2rdf(series_info):
             book_name = str(r)
             book_uri_name = name_to_uri_name(book_name)
             book = URIRef("https://w3id.org/hto/Book/" + book_uri_name)
-            graph.add((book, RDF.type, hto.Book))
+            graph.add((book, RDF.type, SDO.Book))
             graph.add((book, hto.name, Literal(book_name, datatype=XSD.string)))
             graph.add((series, hto.referencedBy, book))
 

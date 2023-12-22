@@ -1,4 +1,4 @@
-from rdflib import Graph, URIRef, FOAF, PROV
+from rdflib import Graph, URIRef, FOAF, PROV, SDO
 import pandas as pd
 from rdflib import Literal, XSD, RDF, RDFS
 from utils import name_to_uri_name, get_source_ref, link_entity_with_software, hto, create_organization, \
@@ -155,7 +155,7 @@ def edition2rdf(edition_info):
             book_name = str(r)
             book_uri_name = name_to_uri_name(book_name)
             book = URIRef("https://w3id.org/hto/Book/" + book_uri_name)
-            graph.add((book, RDF.type, hto.Book))
+            graph.add((book, RDF.type, SDO.Book))
             graph.add((book, hto.name, Literal(book_name, datatype=XSD.string)))
             graph.add((edition, hto.referencedBy, book))
 
