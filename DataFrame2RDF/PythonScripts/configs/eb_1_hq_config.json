@@ -8,7 +8,7 @@
             "filename":"ash_final_eb_1_dataframe_clean_Damon"}
         ],
         "results_filenames": {
-          "dataframes_with_uri": "ash_final_eb_1_dataframe_clean_Damon_with_uris",
+          "dataframe_with_uris": "ash_final_eb_1_dataframe_clean_Damon_with_uris",
           "graph": "hto_eb_1th_hq.ttl"
         }
       }

@@ -91,7 +91,8 @@ def get_source_ref(filePath, agent):
         if len(parts) < 3:
             raise Exception("Wrong input format")
         edition_parts = parts[-3].split("_", 1)
-        file_uri = "https://raw.githubusercontent.com/TU-plogan/kp-editions/main/" + edition_parts[0] + "/" +  edition_parts[1] + "/" +  parts[-2] + "/" + parts[-1]
+        file_uri = "https://raw.githubusercontent.com/TU-plogan/kp-editions/main/" + edition_parts[0] + "/" + \
+                   edition_parts[1] + "/" + parts[-2] + "/" + parts[-1]
         source_ref = URIRef(file_uri)
     else:
         source_uri_name = filePath.replace("/", "_").replace(".", "_")
@@ -112,7 +113,11 @@ def link_reference_terms(new_terms_dataframe_with_uris, graph, previous_datafram
     # 2. For each term in above records, find the term URI in graph.
     # 3. then find all term URIs in graph that has name which appears in reference-terms
     # 4. create triples with refersTo relation for term uri and reference term uri.
-    df_with_references = new_terms_dataframe_with_uris[new_terms_dataframe_with_uris["reference_terms"].apply(lambda references: len(references) > 0 and references[0] != '')].reset_index(drop=True)
+    compare_df = new_terms_dataframe_with_uris
+    if not isinstance(previous_dataframe_with_uris, type(None)):
+        compare_df = previous_dataframe_with_uris
+    df_with_references = new_terms_dataframe_with_uris[new_terms_dataframe_with_uris["reference_terms"].apply(
+        lambda references: len(references) > 0 and references[0] != '')].reset_index(drop=True)
     for df_term_index in tqdm(range(0, len(df_with_references)), desc="Processing", unit="item"):
         # find the term URI in graph
         df_term = df_with_references.loc[df_term_index]
@@ -122,13 +127,11 @@ def link_reference_terms(new_terms_dataframe_with_uris, graph, previous_datafram
         for reference_term in reference_terms:
             if reference_term == "":
                 continue
-            compare_df = new_terms_dataframe_with_uris
-            if previous_dataframe_with_uris:
-                compare_df = previous_dataframe_with_uris
-            references_df = compare_df[(compare_df["MMSID"] == edition_mmsid) & (compare_df["term"] == reference_term)].reset_index(drop=True)
+            references_df = compare_df[
+                (compare_df["MMSID"] == edition_mmsid) & (compare_df["term"] == reference_term)].reset_index(drop=True)
             if len(references_df) > 0:
                 # One term should have only one reference term with specific name. If there are more than one terms have such name, then in theory, we should only take the term which is talking about the same topic. However, some term has no meaningful description except alternative names, or "See Term". In this case, there is no way to identify the topic, so we always take the first reference term found.
                 refers_to = URIRef(str(references_df.loc[0]["uri"]))
-                #print(f"link {term_uri} in {edition_mmsid} to {refers_to}")
+                # print(f"link {term_uri} in {edition_mmsid} to {refers_to}")
                 graph.add((term_uri, hto.refersTo, refers_to))
     return graph

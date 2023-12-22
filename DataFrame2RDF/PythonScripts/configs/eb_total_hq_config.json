@@ -34,7 +34,7 @@
             "filename":"nckp_final_eb_7_dataframe_clean_Damon"}
         ],
         "results_filenames": {
-          "dataframes_with_uri": "eb_total_hq_dataframe_uris",
+          "dataframe_with_uris": "eb_total_hq_dataframe_uris",
           "graph": "hto_eb_total_hq.ttl"
         }
       }

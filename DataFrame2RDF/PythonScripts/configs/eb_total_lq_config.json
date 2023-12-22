@@ -33,7 +33,7 @@
           }
         ],
         "results_filenames": {
-          "dataframes_with_uri": "eb_total_lq_dataframe_uris",
+          "dataframe_with_uris": "eb_total_lq_dataframe_uris",
           "graph": "hto_eb_total_lq.ttl"
         }
       }

@@ -52,7 +52,6 @@ def find_existing_term(same_vol_term_name_in_graph, description):
 
 def dataframe_to_rdf(dataframe, graph, agent_uri, agent, eb_dataset, single_source_dataframe_with_uris):
     edition_mmsids = dataframe["MMSID"].unique()
-    dataframe["id"] = dataframe.index
     dataframe_with_uri_list = []
     for mmsid in edition_mmsids:
         df_edition = dataframe[dataframe["MMSID"] == mmsid]
@@ -101,8 +100,7 @@ def dataframe_to_rdf(dataframe, graph, agent_uri, agent, eb_dataset, single_sour
                         graph.add((term_ref, hto.position, Literal(df_entry["position"], datatype=XSD.int)))
 
                         # Add the term_ref to dataframe
-                        dataframe_equal = (dataframe['id'] == df_entry['id'])
-                        dataframe_new_term = dataframe[dataframe_equal].iloc[0]
+                        dataframe_new_term = df_entry.copy()
                         dataframe_new_term["uri"] = term_ref
                         dataframe_with_uri_list.append(dataframe_new_term)
 
@@ -208,7 +206,7 @@ def run_task(inputs):
     add_software(software_list, graph)
 
     # load dataframe_with_uris generated from single_source_eb_dataframe_to_rdf task
-    input_dataframe_with_uri = inputs["dataframe_with_uri"]
+    input_dataframe_with_uri = inputs["dataframe_with_uris"]
     if "object" in input_dataframe_with_uri:
         single_source_dataframe_with_uris = input_dataframe_with_uri["object"]
     else:
@@ -230,7 +228,7 @@ def run_task(inputs):
         if agent == "NLS":
             df.rename(columns={"relatedTerms": "reference_terms", "typeTerm": "termType", "positionPage": "position", "altoXML": "filePath"},
                       inplace=True)
-        dataframe_with_uris = dataframe_to_rdf(df, graph, agent_uri, agent, eb_dataset, single_source_dataframe_with_uris)
+        graph, dataframe_with_uris = dataframe_to_rdf(df, graph, agent_uri, agent, eb_dataset, single_source_dataframe_with_uris)
         new_terms_dataframe_with_uris_list.append(dataframe_with_uris)
 
         print(f"Finished parsing dataframe {filename} to graph!")
@@ -239,10 +237,10 @@ def run_task(inputs):
     dataframe_with_uris_total = pd.concat([new_terms_dataframe_with_uris, single_source_dataframe_with_uris], ignore_index=True)
 
     if "results_filenames" in inputs:
-        result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframes_with_uri"]
+        result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframe_with_uris"]
         result_graph_filename = inputs["results_filenames"]["graph"]
     else:
-        result_dataframe_with_uris_filename = inputs["dataframes_with_uri"]["filename"]
+        result_dataframe_with_uris_filename = inputs["dataframe_with_uri"]["filename"]
         result_graph_filename = inputs["graph"]["name"]
 
     # store the new dataframe with uris

@@ -8,7 +8,7 @@
             "filename":"final_eb_7_dataframe"}
         ],
         "results_filenames": {
-          "dataframes_with_uri": "final_eb_7_dataframe_with_uris",
+          "dataframe_with_uris": "final_eb_7_dataframe_with_uris",
           "graph": "hto_eb_7th_lq.ttl"
         }
       }

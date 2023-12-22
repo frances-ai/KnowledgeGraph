@@ -375,7 +375,7 @@ def run_task(inputs):
 
     dataframe_with_uris_total = pd.concat(dataframe_with_uris_list, ignore_index=True)
 
-    result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframes_with_uri"]
+    result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframe_with_uris"]
     dataframe_with_uris_filepath = '../dataframe_with_uris/' + result_dataframe_with_uris_filename
     # store the new dataframe with uris
     print(f"Saving dataframe with uris to {dataframe_with_uris_filepath} ....")

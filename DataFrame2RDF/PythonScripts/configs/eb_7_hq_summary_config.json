@@ -8,7 +8,7 @@
             "filename":"nckp_final_eb_7_dataframe_clean_Damon"}
         ],
         "results_filenames": {
-          "dataframes_with_uri": "nckp_final_eb_7_dataframe_clean_Damon_with_uris",
+          "dataframe_with_uris": "nckp_final_eb_7_dataframe_clean_Damon_with_uris",
           "graph": "hto_eb_7th_hq.ttl"
         }
       }
@@ -16,6 +16,9 @@
     {
       "task_name": "summary",
       "inputs": {
+        "graph": {
+          "filename": "hto_eb_7th_hq.ttl"
+        },
         "results_filenames": {
           "graph": "hto_eb_7th_hq_summary.ttl"
         }
