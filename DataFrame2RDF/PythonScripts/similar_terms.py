@@ -46,7 +46,7 @@ def get_descriptions_term_uris_list(graph):
 
 
 def run_task(inputs):
-    print("---- Start summary task ----")
+    print("---- Start similar terms task ----")
     print("Loading the input graph....")
     input_graph = inputs["graph"]
     if "object" in input_graph:
