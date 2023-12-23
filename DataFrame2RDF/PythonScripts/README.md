@@ -293,13 +293,9 @@ outputs:
 ```
 
 This task adds summaries of topic terms descriptions to a graph. It first queries all the descriptions of topic terms (it could 
-get multiple descriptions of one term). Then summarise each description and add the summary to the graph.
+get multiple descriptions of one term). Then summarise each description and add the summary to the graph. 
+This task applies extractive summarization method using [bert-extractive-summarizer](https://pypi.org/project/bert-extractive-summarizer/).
 
-This task applies abstractive summarization method using transformer. Since the length of topic terms is very long, we truncate
-description so that only first limited number of sentences will be used. Also, there is limited tokens a transformer model can handle, 
-we chunk the text into smaller number of sentences (it will not only check the length of total token, but also if it is a complete sentence,
-reducing the risk of losing the meaning of the complete sentence) based on the max number of tokens of the model, and then summarise this chunks,
-and combine them into one.
 
 ### 6. similar_terms
 
