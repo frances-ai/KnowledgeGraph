@@ -37,7 +37,7 @@ def get_descriptions_term_uris_list(graph):
         MAX_LENGTH = 10000
         if len(description) > MAX_LENGTH:
             description = description[:MAX_LENGTH]
-            print(f"----\n{description}\n")
+            #print(f"----\n{description}\n")
 
         descriptions.append(description)
         term_uris.append(term_uri)
