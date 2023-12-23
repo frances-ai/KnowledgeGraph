@@ -1,62 +1,34 @@
-import nltk
 from rdflib import URIRef, RDF, Literal, XSD, Graph
 from rdflib.plugins.sparql import prepareQuery
 from tqdm import tqdm
-from transformers import pipeline
+import nltk
 
 from utils import hto
+from summarizer import TransformerSummarizer
+import os
 
-model_name = "Falconsai/text_summarization"
-summarizer = pipeline("summarization", model=model_name)
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+extractive_model = TransformerSummarizer(transformer_type="XLNet", transformer_model_key="xlnet-base-cased")
 
 
-def summarise_text_abstractive(text):
-    # Spilt text into sentences, and the number of sentences should not be over max sentences
+def reduce_text_size(text):
     MAX_SENTENCES = 100
+    # Tokenize the text into sentences using NLTK
     sentences = nltk.sent_tokenize(text)
-    # print(len(sentences))
+    print(len(sentences))
     if len(sentences) > MAX_SENTENCES:
-        sentences = sentences[:MAX_SENTENCES]
+        reduced_text = ' '.join(sentences[:MAX_SENTENCES])
+        return reduced_text
+    else:
+        return text
 
-    # print("chunking the text....")
-    # Group sentences into small chunk of text whose token length should not be over max token length allowed by the model.
-    tokenizer = summarizer.tokenizer
-    max_token_length = tokenizer.model_max_length - 10
-    # Split the input text into chunks of max_chunk_length
-    chunks = []
-    current_chunk = []
 
-    # Chunk the sentences based on the maximum token length
-    for sentence in sentences:
-        tokenized_sentence = tokenizer.encode(sentence, add_special_tokens=False)
-        if len(current_chunk) + len(tokenized_sentence) < max_token_length :
-            current_chunk.extend(tokenized_sentence)
-        else:
-            chunks.append(current_chunk)
-            current_chunk = list(tokenized_sentence)
-
-    if current_chunk:
-        chunks.append(current_chunk)
-
-    # Convert token IDs back to text
-    grouped_sentences = [''.join(tokenizer.decode(chunk)) for chunk in chunks]
-    # print(f"text is chunked into {len(grouped_sentences)} pieces")
-
-    summaries = []
-    for index in range(0, len(grouped_sentences)):
-        # Perform summarization on each chunk
-        chunk = grouped_sentences[index]
-        chunk_token_length = len(chunks[index])
-        MAX_SUMMARY_LENGTH = 100
-        MIN_LENGTH = 5
-        if chunk_token_length < MIN_LENGTH * 2:
-            continue
-        if chunk_token_length < MAX_SUMMARY_LENGTH * 2:
-            MAX_SUMMARY_LENGTH = int(chunk_token_length / 2)
-
-        summary = summarizer(chunk, max_length=MAX_SUMMARY_LENGTH, min_length=MIN_LENGTH, do_sample=False)
-        summaries.append(summary[0]['summary_text'])
-    return ' '.join(summaries)
+def summarize_text_extractive(text):
+    text = reduce_text_size(text)
+    summary = ''.join(extractive_model(text, min_length=60, max_length=300))
+    return summary
 
 
 def get_description_uris_list(graph):
@@ -103,7 +75,7 @@ def run_task(inputs):
     print("Summarising the descriptions......")
     for index in tqdm(range(0, len(uri_description_list)), desc="Processing", unit="item"):
         description = uri_description_list[index]["description"]
-        summary = summarise_text_abstractive(description)
+        summary = summarize_text_extractive(description)
         uri_description_list[index]["summary"] = summary
     print("Finished summarising the descriptions!")
 
