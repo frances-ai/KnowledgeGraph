@@ -9,7 +9,7 @@ model_name = 'all-mpnet-base-v2'
 model = SentenceTransformer(model_name)
 
 
-def paraphrases(descriptions):
+def paraphrases_mining(descriptions):
     return util.paraphrase_mining(model, descriptions, corpus_chunk_size=len(descriptions), top_k=20,
                                   show_progress_bar=True)
 
@@ -65,7 +65,7 @@ def run_task(inputs):
     print("Got all the descriptions!")
 
     print("Paraphrasing the descriptions......")
-    paraphrases(descriptions)
+    paraphrases = paraphrases_mining(descriptions)
     print("Finished paraphrasing the descriptions!")
 
     print("Linking similar terms......")
