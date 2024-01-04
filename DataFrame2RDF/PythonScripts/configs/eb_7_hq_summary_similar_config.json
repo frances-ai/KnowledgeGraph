@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "task_name": "similar_terms",
+      "inputs": {
+        "graph": {
+          "filename": "hto_eb_7th_hq_summary.ttl"
+        },
+        "results_filenames": {
+          "graph": "hto_eb_7th_hq_summary_similar.ttl"
+        }
+      }
+    }
+  ]
+}

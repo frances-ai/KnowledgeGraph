@@ -8,3 +8,4 @@ bert-extractive-summarizer
 torch
 torchvision
 torchaudio
+sparqlwrapper
