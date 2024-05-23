@@ -1,0 +1,17 @@
+{
+  "tasks": [
+    {
+      "task_name": "single_source_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframes": [
+          {"agent": "NLS",
+            "filename":"final_eb_1_dataframe"}
+        ],
+        "results_filenames": {
+          "dataframe_with_uris": "final_eb_1_dataframe_with_uris",
+          "graph": "hto_eb_1th_lq.ttl"
+        }
+      }
+    }
+  ]
+}

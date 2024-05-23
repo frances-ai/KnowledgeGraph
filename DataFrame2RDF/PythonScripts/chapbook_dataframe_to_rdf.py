@@ -189,41 +189,41 @@ def dataframe_to_rdf(dataframe, agent_uri, agent, chapbook_dataset):
                 page_id = str(df_page["MMSID"]) + "_" + str(df_page["volumeId"]) + "_" + str(page_num)
                 page_uri = URIRef("https://w3id.org/hto/Page/" + page_id)
                 graph.add((page_uri, RDF.type, hto.Page))
+                graph.add((page_uri, hto.number, Literal(page_num, datatype=XSD.integer)))
 
                 # Create original description for the page
                 description = str(df_page["text"])
-                if description != "":
-                    page_original_description = URIRef("https://w3id.org/hto/OriginalDescription/" + page_id + agent)
-                    graph.add((page_original_description, RDF.type, hto.OriginalDescription))
-                    graph.add((page_original_description, hto.hasTextQuality, hto.Low))
-                    graph.add((page_original_description, hto.text, Literal(description, datatype=XSD.string)))
-                    graph.add((page_uri, hto.hasOriginalDescription, page_original_description))
-                    graph.add((volume_ref, hto.hadMember, page_uri))
-                    graph.add((page_original_description, PROV.wasAttributedTo, frances_information_extraction))
+                page_original_description = URIRef("https://w3id.org/hto/OriginalDescription/" + page_id + agent)
+                graph.add((page_original_description, RDF.type, hto.OriginalDescription))
+                graph.add((page_original_description, hto.hasTextQuality, hto.Low))
+                graph.add((page_original_description, hto.text, Literal(description, datatype=XSD.string)))
+                graph.add((page_uri, hto.hasOriginalDescription, page_original_description))
+                graph.add((volume_ref, hto.hadMember, page_uri))
+                graph.add((page_original_description, PROV.wasAttributedTo, frances_information_extraction))
 
-                    # Create source entity where original description was extracted
-                    # source location
-                    # source_path_name = df_entry["altoXML"]
-                    # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
-                    # graph.add((source_path_ref, RDF.type, PROV.Location))
-                    # source
-                    source_name = df_page["altoXML"].replace("/", "_").replace(".", "_")
-                    source_ref = URIRef("https://w3id.org/hto/InformationResource/" + source_name)
-                    graph.add((source_ref, RDF.type, hto.InformationResource))
-                    graph.add((chapbook_dataset, hto.hadMember, source_ref))
-                    # graph.add((source_ref, PROV.atLocation, source_path_ref))
-                    # related agent and activity
-                    graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
-                    graph.add((source_ref, PROV.wasAttributedTo, defoe))
+                # Create source entity where original description was extracted
+                # source location
+                # source_path_name = df_entry["altoXML"]
+                # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
+                # graph.add((source_path_ref, RDF.type, PROV.Location))
+                # source
+                source_name = df_page["altoXML"].replace("/", "_").replace(".", "_")
+                source_ref = URIRef("https://w3id.org/hto/InformationResource/" + source_name)
+                graph.add((source_ref, RDF.type, hto.InformationResource))
+                graph.add((chapbook_dataset, hto.hadMember, source_ref))
+                # graph.add((source_ref, PROV.atLocation, source_path_ref))
+                # related agent and activity
+                graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
+                graph.add((source_ref, PROV.wasAttributedTo, defoe))
 
-                    """
-                    source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
-                    graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
-                    graph.add((source_digitalising_activity, PROV.generated, source_ref))
-                    graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
-                    graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
-                    """
-                    graph.add((page_original_description, hto.wasExtractedFrom, source_ref))
+                """
+                source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
+                graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
+                graph.add((source_digitalising_activity, PROV.generated, source_ref))
+                graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
+                graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
+                """
+                graph.add((page_original_description, hto.wasExtractedFrom, source_ref))
 
     return graph
 

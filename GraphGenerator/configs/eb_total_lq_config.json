@@ -1,0 +1,42 @@
+{
+  "tasks": [
+    {
+      "task_name": "single_source_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframes": [
+          {"agent": "NLS",
+            "filename":"final_eb_1_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_2_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_3_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_4_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_4_5_6_suplement_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_5_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_6_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_7_dataframe"
+          },
+          {"agent": "NLS",
+            "filename":"final_eb_8_dataframe"
+          }
+        ],
+        "results_filenames": {
+          "dataframe_with_uris": "eb_total_lq_dataframe_uris",
+          "graph": "hto_eb_total_lq.ttl"
+        }
+      }
+    }
+  ]
+}

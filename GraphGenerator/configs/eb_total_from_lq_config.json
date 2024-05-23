@@ -1,0 +1,27 @@
+{
+  "tasks":[
+    {
+      "task_name": "multiple_source_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframes": [
+          {
+            "agent": "Ash",
+            "filename": "ash_final_eb_1_dataframe_clean_Damon"
+          },
+           {"agent": "NCKP",
+            "filename":"nckp_final_eb_7_dataframe_clean_Damon"}
+        ],
+        "dataframe_with_uris": {
+            "filename": "eb_total_lq_dataframe_uris"
+        },
+        "graph": {
+            "filename": "hto_eb_total_lq.ttl"
+        },
+        "results_filenames": {
+          "dataframe_with_uris": "eb_total_dataframe_uris",
+          "graph": "hto_eb_total.ttl"
+        }
+      }
+    }
+  ]
+}

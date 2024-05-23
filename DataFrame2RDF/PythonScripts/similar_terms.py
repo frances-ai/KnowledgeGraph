@@ -79,7 +79,7 @@ def run_task(inputs):
     if "results_filenames" in inputs:
         result_graph_filename = inputs["results_filenames"]["graph"]
     else:
-        result_graph_filename = inputs["graph"]["name"]
+        result_graph_filename = inputs["graph"]["filename"]
 
     # Save the Graph in the RDF Turtle format
     result_graph_filename = inputs["results_filenames"]["graph"]

@@ -1,5 +1,5 @@
 import pandas as pd
-from rdflib import Literal, XSD, RDF, URIRef, Graph
+from rdflib import Literal, XSD, RDF, RDFS, URIRef, Graph
 from rdflib.namespace import FOAF, PROV, Namespace
 from difflib import SequenceMatcher
 
@@ -51,6 +51,7 @@ def find_existing_term(same_vol_term_name_in_graph, description):
 
 
 def dataframe_to_rdf(dataframe, graph, agent_uri, agent, eb_dataset, single_source_dataframe_with_uris):
+    dataframe = dataframe.fillna(0)
     edition_mmsids = dataframe["MMSID"].unique()
     dataframe_with_uri_list = []
     for mmsid in edition_mmsids:
@@ -136,49 +137,48 @@ def dataframe_to_rdf(dataframe, graph, agent_uri, agent, eb_dataset, single_sour
                     if "alter_names" in df_entry:
                         alter_names = df_entry["alter_names"]
                         for alter_name in alter_names:
-                            graph.add((term_ref, hto.name, Literal(alter_name, datatype=XSD.string)))
+                            graph.add((term_ref, RDFS.label, Literal(alter_name, datatype=XSD.string)))
 
                     # Create original description instance
-                    if description != "":
-                        term_original_description = URIRef(
-                            "https://w3id.org/hto/OriginalDescription/" + term_id + agent)
-                        graph.add((term_original_description, RDF.type, hto.OriginalDescription))
-                        text_quality = hto.Low
-                        if agent == "Ash":
-                            text_quality = hto.Moderate
-                        elif agent == "NCKP":
-                            text_quality = hto.High
-                        graph.add((term_original_description, hto.hasTextQuality, text_quality))
-                        # graph.add((term_original_description, hto.numberOfWords, Literal(df_entry["numberOfWords"], datatype=XSD.int)))
-                        graph.add((term_original_description, hto.text, Literal(description, datatype=XSD.string)))
-                        graph.add((term_ref, hto.hasOriginalDescription, term_original_description))
-                        link_entity_with_software(graph, term_original_description, "description", agent)
+                    term_original_description = URIRef(
+                        "https://w3id.org/hto/OriginalDescription/" + term_id + agent)
+                    graph.add((term_original_description, RDF.type, hto.OriginalDescription))
+                    text_quality = hto.Low
+                    if agent == "Ash":
+                        text_quality = hto.High
+                    elif agent == "NCKP":
+                        text_quality = hto.High
+                    graph.add((term_original_description, hto.hasTextQuality, text_quality))
+                    # graph.add((term_original_description, hto.numberOfWords, Literal(df_entry["numberOfWords"], datatype=XSD.int)))
+                    graph.add((term_original_description, hto.text, Literal(description, datatype=XSD.string)))
+                    graph.add((term_ref, hto.hasOriginalDescription, term_original_description))
+                    link_entity_with_software(graph, term_original_description, "description", agent)
 
-                        # Create source entity where original description was extracted
-                        # source location
-                        # source_path_name = df_entry["altoXML"]
-                        # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
-                        # graph.add((source_path_ref, RDF.type, PROV.Location))
-                        # source
-                        file_path = str(df_entry["filePath"])
-                        source_ref = get_source_ref(file_path, agent)
-                        graph.add((source_ref, RDF.type, hto.InformationResource))
-                        graph.add((source_ref, PROV.value, Literal(file_path, datatype=XSD.string)))
-                        graph.add((eb_dataset, hto.hadMember, source_ref))
-                        graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
-                        link_entity_with_software(graph, source_ref, "source", agent)
+                    # Create source entity where original description was extracted
+                    # source location
+                    # source_path_name = df_entry["altoXML"]
+                    # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
+                    # graph.add((source_path_ref, RDF.type, PROV.Location))
+                    # source
+                    file_path = str(df_entry["filePath"])
+                    source_ref = get_source_ref(file_path, agent)
+                    graph.add((source_ref, RDF.type, hto.InformationResource))
+                    graph.add((source_ref, PROV.value, Literal(file_path, datatype=XSD.string)))
+                    graph.add((eb_dataset, hto.hadMember, source_ref))
+                    graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
+                    link_entity_with_software(graph, source_ref, "source", agent)
 
-                        # graph.add((source_ref, PROV.atLocation, source_path_ref))
-                        # related agent and activity
+                    # graph.add((source_ref, PROV.atLocation, source_path_ref))
+                    # related agent and activity
 
-                        """
-                        source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
-                        graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
-                        graph.add((source_digitalising_activity, PROV.generated, source_ref))
-                        graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
-                        graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
-                        """
-                        graph.add((term_original_description, hto.wasExtractedFrom, source_ref))
+                    """
+                    source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
+                    graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
+                    graph.add((source_digitalising_activity, PROV.generated, source_ref))
+                    graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
+                    graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
+                    """
+                    graph.add((term_original_description, hto.wasExtractedFrom, source_ref))
 
     dataframe_with_uris = pd.concat(dataframe_with_uri_list, axis=1).T.reset_index(drop=True)
     return graph, dataframe_with_uris
@@ -242,7 +242,7 @@ def run_task(inputs):
         result_graph_filename = inputs["results_filenames"]["graph"]
     else:
         result_dataframe_with_uris_filename = inputs["dataframe_with_uri"]["filename"]
-        result_graph_filename = inputs["graph"]["name"]
+        result_graph_filename = inputs["graph"]["filename"]
 
     # store the new dataframe with uris
     result_dataframe_with_uris_filepath = '../dataframe_with_uris/' + result_dataframe_with_uris_filename

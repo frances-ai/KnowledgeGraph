@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "task_name": "summary",
+      "inputs": {
+        "graph": {
+          "filename": "hto_eb_total_hq.ttl"
+        },
+        "results_filenames": {
+          "graph": "hto_eb_total_hq_summary.ttl"
+        }
+      }
+    },
+    {
+      "task_name": "similar_terms",
+      "inputs": {
+        "results_filenames": {
+          "graph": "hto_eb_total_hq_summary_similar.ttl"
+        }
+      }
+    }
+  ]
+}

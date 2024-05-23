@@ -1,20 +1,83 @@
+import pickle
+import random
+
 import regex
 from rdflib import Literal, XSD, RDF, URIRef
 from rdflib.namespace import FOAF, PROV, Namespace
 from tqdm import tqdm
 
+import re
+
 NON_AZ09_REGEXP = regex.compile('[^\p{L}\p{N}]')
+MAX_SIZE_NAMES = 10000000000
+
+name_map = {}
+
+
+def get_term_id_from_uri(term_uri):
+    return term_uri.split("/")[-1]
+
+
+def remove_extra_spaces(text):
+    text = text.strip()
+    # Remove extra spaces before punctuation
+    text = re.sub(r'\s+([,.;:])', r'\1', text)
+    # Remove extra spaces around slashes and hyphens that are not part of words
+    #text = re.sub(r'\s*/\s*', '/', text)
+    text = re.sub(r'\s*-\s*', '-', text)
+    # Replace multiple spaces with a single space
+    text = re.sub(r'\s+', ' ', text)
+    return text
 
 
 def name_to_uri_name(name):
-    uri_name = NON_AZ09_REGEXP.sub('', name)
-    return uri_name
+    """
+    Convert a name to a format which will be shown in the uri of a resource. This format (uri name) is digits based,
+    which means  a sequence of digits are used to represent the name in the uri. Same name should have the
+    same uri name.
+    :param name: name of a resource
+    :return: string as uri name (digits based).
+    """
+    if name in name_map:
+        return name_map[name]
+
+    name_id = random.randint(0, MAX_SIZE_NAMES)
+    while str(name_id) in name_map.values():
+        name_id = random.randint(0, MAX_SIZE_NAMES)
+    name_map[name] = str(name_id)
+    return str(name_id)
+
+
+def save_name_map(filepath):
+    """
+    Save the name map into a pickle file, so it can be used to convert names to uri names, thus the form of uri
+    can be consistent - same name should have the same uri name.
+    :param filepath: where the file will be stored.
+    :return:
+    """
+    with open(filepath, 'wb') as f:
+        pickle.dump(name_map, f)
+
+
+def load_name_map(filepath):
+    """
+    Load the name map from a pickle file, so it can be used to convert names to uri names, thus the form of uri
+    can be consistent - same name should have the same uri name.
+    :param filepath: where the file will be stored.
+    :return:
+    """
+    try:
+        with open(filepath, 'rb') as f:
+            global name_map
+            name_map = pickle.load(f)
+    except FileNotFoundError:
+        name_map = {}
 
 
 hto = Namespace("https://w3id.org/hto#")
 
 agents = {
-    "NCKP": ["Nineteen Century Knowledge Project", hto.Organization],
+    "NCKP": ["Nineteenth-Century Knowledge Project", hto.Organization],
     "Ash": ["Ash Charlton", hto.Person],
     "NLS": ["National Library of Scotland", hto.Organization]
 }
@@ -48,6 +111,27 @@ def create_dataset(collection_short_name, agent_uri, agent, graph):
 defoe = URIRef("https://github.com/defoe-code/defoe")
 frances_information_extraction = URIRef("https://github.com/frances-ai/frances-InformationExtraction")
 ABBYYFineReader = URIRef("https://pdf.abbyy.com")
+
+all_software_list = [
+    {
+        "uri": defoe,
+        "name": "defoe"
+    },
+    {
+        "uri": frances_information_extraction,
+        "name": "frances information extraction"
+    },
+    {
+        "uri": ABBYYFineReader,
+        "name": "ABBYY FineReader"
+    }
+]
+
+
+def add_software_with_name(software_list, graph):
+    for software in software_list:
+        graph.add((software["uri"], RDF.type, hto.SoftwareAgent))
+        graph.add((software["uri"], FOAF.name, Literal(software["name"], datatype=XSD.string)))
 
 
 def add_software(software_list, graph):
