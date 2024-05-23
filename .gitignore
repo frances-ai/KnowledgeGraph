@@ -3,3 +3,4 @@
 .idea
 /experiments/
 /DataFrame2RDF/dataframe_with_uris/
+/GraphGenerator/dataframe_with_uris/

@@ -1,16 +1,22 @@
 import argparse
 import json
+from utils import load_name_map, save_name_map
 import single_source_eb_dataframe_to_rdf, chapbook_dataframe_to_rdf, multiple_source_eb_dataframe_to_rdf, \
-    merge_graphs, summary, similar_terms
+    merge_graphs, summary, similar_terms, neuspell_corrected_eb_dataframe_to_rdf, add_page_permanent_url, \
+    gazetteers_dataframe_to_rdf, ladies_dataframe_to_rdf
 
 
 task_executors = {
     "single_source_eb_dataframe_to_rdf": single_source_eb_dataframe_to_rdf.run_task,
     "multiple_source_eb_dataframe_to_rdf": multiple_source_eb_dataframe_to_rdf.run_task,
     "chapbook_dataframe_to_rdf": chapbook_dataframe_to_rdf.run_task,
+    "gazetteers_dataframe_to_rdf": gazetteers_dataframe_to_rdf.run_task,
+    "ladies_dataframe_to_rdf": ladies_dataframe_to_rdf.run_task,
     "merge_graphs": merge_graphs.run_task,
     "summary": summary.run_task,
-    "similar_terms": similar_terms.run_task
+    "similar_terms": similar_terms.run_task,
+    "neuspell_corrected_eb_dataframe_to_rdf": neuspell_corrected_eb_dataframe_to_rdf.run_task,
+    "add_page_permanent_url": add_page_permanent_url.run_task
 }
 
 
@@ -57,6 +63,9 @@ def run_tasks(config):
 
 
 if __name__ == "__main__":
+    name_map_file = "name_map.pickle"
+    load_name_map(name_map_file)
     args, remaining = parse_common_args()
     config = read_config(args.config_file)
     run_tasks(config)
+    save_name_map(name_map_file)

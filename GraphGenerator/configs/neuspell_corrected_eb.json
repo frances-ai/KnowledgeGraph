@@ -1,0 +1,47 @@
+{
+  "tasks": [
+    {
+      "task_name": "neuspell_corrected_eb_dataframe_to_rdf",
+      "inputs": {
+        "dataframe_with_uris": {
+            "filename": "eb_total_lq_dataframe_uris"
+        },
+        "graph": {
+            "filename": "hto_eb_total.ttl"
+        },
+        "dataframes": [
+          {
+            "filename":"final_eb_1_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_2_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_3_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_4_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_4_5_6_suplement_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_5_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_6_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_7_dataframe_ElmosclstmChecker"
+          },
+          {
+            "filename":"final_eb_8_dataframe_ElmosclstmChecker"
+          }
+        ],
+        "results_filenames": {
+          "graph": "hto_eb_total_neuspell.ttl"
+        }
+      }
+    }
+  ]
+}

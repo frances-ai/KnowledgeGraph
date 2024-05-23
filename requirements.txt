@@ -9,3 +9,5 @@ torch
 torchvision
 torchaudio
 sparqlwrapper
+bertopic
+elasticsearch

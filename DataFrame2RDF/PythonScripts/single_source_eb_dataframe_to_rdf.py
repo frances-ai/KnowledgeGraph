@@ -56,7 +56,8 @@ def edition2rdf(edition_info):
         edition_title = str(edition_info["supplementTitle"])
         subtitle = edition_info["supplementSubTitle"]
         for to_edition_num in supplmentsTo:
-            if to_edition_num in edition_uris.keys():
+            to_edition_num = int(to_edition_num)
+            if to_edition_num in edition_uris:
                 to_edition_uri = edition_uris[to_edition_num]
                 graph.add((edition, hto.wasSupplementOf, to_edition_uri))
     else:
@@ -169,6 +170,7 @@ def volume2rdf(volume_info, edition):
     volume = URIRef("https://w3id.org/hto/Volume/" + str(volume_info["MMSID"]) + "_" + str(volume_id))
     graph.add((volume, RDF.type, hto.Volume))
     graph.add((volume, hto.number, Literal(volume_info["volumeNum"], datatype=XSD.integer)))
+    graph.add((volume, hto.numberOfPages, Literal(volume_info["numberOfPages"], datatype=XSD.integer)))
     if volume_info["letters"] != 0 and volume_info["letters"] != "":
         graph.add((volume, hto.letters, Literal(volume_info["letters"], datatype=XSD.string)))
     graph.add((volume, hto.volumeId, Literal(volume_id, datatype=XSD.string)))
@@ -263,61 +265,60 @@ def dataframe_to_rdf(dataframe, agent_uri, agent, eb_dataset):
                     if "note" in df_entry:
                         note = df_entry["note"]
                         if note != 0:
+                            print(note)
                             graph.add((term_ref, hto.note, Literal(note, datatype=XSD.string)))
 
                     if "alter_names" in df_entry:
                         alter_names = df_entry["alter_names"]
                         for alter_name in alter_names:
-                            graph.add((term_ref, hto.name, Literal(alter_name, datatype=XSD.string)))
+                            graph.add((term_ref, RDFS.label, Literal(alter_name, datatype=XSD.string)))
 
                     # Create original description instance
                     description = df_entry["definition"]
-                    if description != "":
+                    term_original_description = URIRef(
+                        "https://w3id.org/hto/OriginalDescription/" + str(df_entry["MMSID"]) + "_" + str(
+                            df_entry["volumeId"]) + "_" + term_uri_name + "_" + str(t_count) + agent)
+                    graph.add((term_original_description, RDF.type, hto.OriginalDescription))
+                    text_quality = hto.Low
+                    if agent == "Ash":
+                        text_quality = hto.High
+                    elif agent == "NCKP":
+                        text_quality = hto.High
+                    graph.add((term_original_description, hto.hasTextQuality, text_quality))
+                    # graph.add((term_original_description, hto.numberOfWords, Literal(df_entry["numberOfWords"], datatype=XSD.int)))
+                    graph.add(
+                        (term_original_description, hto.text, Literal(description, datatype=XSD.string)))
 
-                        term_original_description = URIRef(
-                            "https://w3id.org/hto/OriginalDescription/" + str(df_entry["MMSID"]) + "_" + str(
-                                df_entry["volumeId"]) + "_" + term_uri_name + "_" + str(t_count) + agent)
-                        graph.add((term_original_description, RDF.type, hto.OriginalDescription))
-                        text_quality = hto.Low
-                        if agent == "Ash":
-                            text_quality = hto.Moderate
-                        elif agent == "NCKP":
-                            text_quality = hto.High
-                        graph.add((term_original_description, hto.hasTextQuality, text_quality))
-                        # graph.add((term_original_description, hto.numberOfWords, Literal(df_entry["numberOfWords"], datatype=XSD.int)))
-                        graph.add(
-                            (term_original_description, hto.text, Literal(df_entry["definition"], datatype=XSD.string)))
+                    graph.add((term_ref, hto.hasOriginalDescription, term_original_description))
+                    graph.add((term_ref, hto.position, Literal(df_entry["position"], datatype=XSD.int)))
 
-                        graph.add((term_ref, hto.hasOriginalDescription, term_original_description))
-                        graph.add((term_ref, hto.position, Literal(df_entry["position"], datatype=XSD.int)))
+                    link_entity_with_software(graph, term_original_description, "description", agent)
 
-                        link_entity_with_software(graph, term_original_description, "description", agent)
+                    # Create source entity where original description was extracted
+                    # source location
+                    # source_path_name = df_entry["altoXML"]
+                    # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
+                    # graph.add((source_path_ref, RDF.type, PROV.Location))
+                    # source
+                    file_path = str(df_entry["filePath"])
+                    source_ref = get_source_ref(file_path, agent)
+                    graph.add((source_ref, RDF.type, hto.InformationResource))
+                    graph.add((source_ref, PROV.value, Literal(file_path, datatype=XSD.string)))
+                    graph.add((eb_dataset, hto.hadMember, source_ref))
+                    graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
+                    link_entity_with_software(graph, source_ref, "source", agent)
 
-                        # Create source entity where original description was extracted
-                        # source location
-                        # source_path_name = df_entry["altoXML"]
-                        # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
-                        # graph.add((source_path_ref, RDF.type, PROV.Location))
-                        # source
-                        file_path = str(df_entry["filePath"])
-                        source_ref = get_source_ref(file_path, agent)
-                        graph.add((source_ref, RDF.type, hto.InformationResource))
-                        graph.add((source_ref, PROV.value, Literal(file_path, datatype=XSD.string)))
-                        graph.add((eb_dataset, hto.hadMember, source_ref))
-                        graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
-                        link_entity_with_software(graph, source_ref, "source", agent)
+                    # graph.add((source_ref, PROV.atLocation, source_path_ref))
+                    # related agent and activity
 
-                        # graph.add((source_ref, PROV.atLocation, source_path_ref))
-                        # related agent and activity
-
-                        """
-                        source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
-                        graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
-                        graph.add((source_digitalising_activity, PROV.generated, source_ref))
-                        graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
-                        graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
-                        """
-                        graph.add((term_original_description, hto.wasExtractedFrom, source_ref))
+                    """
+                    source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
+                    graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
+                    graph.add((source_digitalising_activity, PROV.generated, source_ref))
+                    graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
+                    graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
+                    """
+                    graph.add((term_original_description, hto.wasExtractedFrom, source_ref))
 
                     ## startsAt
                     page_startsAt = URIRef("https://w3id.org/hto/Page/" + str(df_entry["MMSID"]) + "_" + str(

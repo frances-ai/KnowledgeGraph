@@ -36,7 +36,11 @@ def get_description_uris_list(graph):
         SELECT ?description ?text WHERE {
             ?term a hto:TopicTermRecord;
                 hto:hasOriginalDescription ?description.
-            ?description hto:text ?text.
+            ?description hto:text ?text;
+                hto:hasTextQuality ?textQuality.
+            FILTER NOT EXISTS {
+              ?term hto:hasOriginalDescription [hto:hasTextQuality [hto:isTextQualityHigherThan ?textQuality]].
+            }
         }
       ''', initNs={"hto": hto}
                       )
@@ -94,7 +98,7 @@ def run_task(inputs):
     if "results_filenames" in inputs:
         result_graph_filename = inputs["results_filenames"]["graph"]
     else:
-        result_graph_filename = inputs["graph"]["name"]
+        result_graph_filename = inputs["graph"]["filename"]
 
     # Save the Graph in the RDF Turtle format
     result_graph_filepath = "../../results/" + result_graph_filename

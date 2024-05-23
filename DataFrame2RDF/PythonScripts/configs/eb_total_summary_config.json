@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "task_name": "summary",
+      "inputs": {
+        "graph": {
+          "filename": "hto_eb_total_neuspell_page_url.ttl"
+        },
+        "results_filenames": {
+          "graph": "hto_eb_total_neuspell_page_url_summary.ttl"
+        }
+      }
+    }
+  ]
+}
