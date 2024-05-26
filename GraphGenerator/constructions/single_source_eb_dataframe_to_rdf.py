@@ -9,11 +9,11 @@ from ..utils import name_to_uri_name, get_source_ref, link_entity_with_software,
 graph = Graph()
 
 # Load your ontology file into the graph
-ontology_file = "../../hto.ttl"
+ontology_file = "hto.ttl"
 graph.parse(ontology_file, format="turtle")
 
 # load metadata
-metadata_df = pd.read_json("../../source_dataframes/eb/nls_metadata_dataframe", orient="index")
+metadata_df = pd.read_json("source_dataframes/eb/nls_metadata_dataframe", orient="index")
 
 
 def create_collection():
@@ -361,13 +361,13 @@ def run_task(inputs):
 
     for dataframe in eb_dataframes:
         filename = dataframe["filename"]
-        file_path = "../../source_dataframes/eb/" + filename
+        file_path = "source_dataframes/eb/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
         eb_dataset = create_dataset("eb", agent_uri, agent, graph)
         df = pd.read_json(file_path, orient="index")
-
+        df = df[:100]
         if agent == "NLS":
             df.rename(columns={"relatedTerms": "reference_terms", "typeTerm": "termType", "positionPage": "position", "altoXML": "filePath"},
                       inplace=True)
@@ -379,7 +379,7 @@ def run_task(inputs):
     dataframe_with_uris_total = pd.concat(dataframe_with_uris_list, ignore_index=True)
 
     result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframe_with_uris"]
-    dataframe_with_uris_filepath = '../dataframe_with_uris/' + result_dataframe_with_uris_filename
+    dataframe_with_uris_filepath = 'GraphGenerator/dataframe_with_uris/' + result_dataframe_with_uris_filename
     # store the new dataframe with uris
     print(f"Saving dataframe with uris to {dataframe_with_uris_filepath} ....")
     dataframe_with_uris_total.to_json(dataframe_with_uris_filepath, orient="index")
@@ -391,7 +391,7 @@ def run_task(inputs):
 
     # Save the Graph in the RDF Turtle format
     result_graph_filename = inputs["results_filenames"]["graph"]
-    result_graph_filepath = "../../results/" + result_graph_filename
+    result_graph_filepath = "results/" + result_graph_filename
     print(f"Saving the result graph to {result_graph_filepath}....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Finished saving the result graph!")

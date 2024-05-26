@@ -124,7 +124,7 @@ def link_dbpedia_with_concept(df):
 
 def run_task(inputs):
     print("Reading the source dataframe .....")
-    eb_kg_df = pd.read_json("../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
+    eb_kg_df = pd.read_json("eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
     print("Linking dbpedia items.......")
     exception_concept_uris, concept_dbpedia_item_list = link_dbpedia_with_concept(eb_kg_df)
     concept_dbpedia_item_df = pd.DataFrame(concept_dbpedia_item_list)

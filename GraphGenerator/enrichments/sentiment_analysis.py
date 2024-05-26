@@ -14,7 +14,7 @@ def get_sentiment_result(description):
 
 
 def run_task(inputs):
-    eb_kg_hq_dataframe = pd.read_json("../eb_kg_hq_dataframe", orient="index")
+    eb_kg_hq_dataframe = pd.read_json("eb_kg_hq_dataframe", orient="index")
     eb_kg_hq_dataframe = eb_kg_hq_dataframe
 
     tqdm.pandas(desc="Processing sentiment analysis!")

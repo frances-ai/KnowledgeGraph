@@ -60,7 +60,7 @@ topic_model = BERTopic(
     verbose=True)
 
 def run_task(inputs):
-    eb_kg_hq_dataframe = pd.read_json("../eb_kg_hq_with_normalised_embeddings_dataframe", orient="index")
+    eb_kg_hq_dataframe = pd.read_json("/eb_kg_hq_with_normalised_embeddings_dataframe", orient="index")
     descriptions = [row['summary'] if row['summary'] is not None else row['description'] for index, row in
                     eb_kg_hq_dataframe.iterrows()]
 

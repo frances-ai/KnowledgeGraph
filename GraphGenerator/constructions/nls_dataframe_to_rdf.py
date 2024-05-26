@@ -8,7 +8,7 @@ from ..utils import hto, name_to_uri_name, frances_information_extraction, defoe
 # Create a new RDFLib Graph
 graph = Graph()
 
-ontology_file = "../../hto.ttl"
+ontology_file = "hto.ttl"
 graph.parse(ontology_file, format="turtle")
 
 
@@ -239,7 +239,7 @@ def run_task(inputs):
 
     for dataframe in chapbook_dataframes:
         filename = dataframe["filename"]
-        file_path = "../../source_dataframes/chapbooks/" + filename
+        file_path = "source_dataframes/chapbooks/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
@@ -252,7 +252,7 @@ def run_task(inputs):
 
     # Save the Graph in the RDF Turtle format
     result_graph_filename = inputs["results_filenames"]["graph"]
-    result_graph_filepath = "../../results/" + result_graph_filename
+    result_graph_filepath = "results/" + result_graph_filename
     print(f"Saving the result graph to {result_graph_filepath}....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Finished saving the result graph!")

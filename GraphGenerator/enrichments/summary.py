@@ -68,7 +68,7 @@ def run_task(inputs):
         graph = Graph()
         # Load your ontology file into the graph
         graph_filename = input_graph["filename"]
-        graph_filepath = "../../results/" + graph_filename
+        graph_filepath = "results/" + graph_filename
         graph.parse(graph_filepath, format="turtle")
     print("The input graph is loaded!")
 
@@ -101,7 +101,7 @@ def run_task(inputs):
         result_graph_filename = inputs["graph"]["filename"]
 
     # Save the Graph in the RDF Turtle format
-    result_graph_filepath = "../../results/" + result_graph_filename
+    result_graph_filepath = "results/" + result_graph_filename
     print(f"Saving the result graph to {result_graph_filepath}....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Finished saving the result graph!")

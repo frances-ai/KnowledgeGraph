@@ -1,9 +1,9 @@
 import argparse
 import json
-from utils import load_name_map, save_name_map
-from constructions import single_source_eb_dataframe_to_rdf, multiple_source_eb_dataframe_to_rdf, \
+from .utils import load_name_map, save_name_map
+from .constructions import single_source_eb_dataframe_to_rdf, multiple_source_eb_dataframe_to_rdf, \
     neuspell_corrected_eb_dataframe_to_rdf, add_page_permanent_url, nls_dataframe_to_rdf
-from enrichments import summary, save_embedding, term_record_linkage, wikidata_linkage, \
+from .enrichments import summary, save_embedding, term_record_linkage, wikidata_linkage, \
     sentiment_analysis, dbpedia_linkage
 
 
