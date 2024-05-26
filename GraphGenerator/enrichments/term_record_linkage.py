@@ -115,9 +115,11 @@ def group_terms_to_concept(df):
 
 def run_task(inputs):
     print("Loading dataframe.....")
-    eb_kg_df = pd.read_json("../eb_kg_hq_with_normalised_embeddings_dataframe", orient="index")
+    eb_kg_df_filename = inputs["dataframe"]["filename"]
+    eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
     print("Grouping terms into concepts.....")
     df = group_terms_to_concept(eb_kg_df)
-    print("Saving dataframe to file")
-    df.to_json("../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    print(f"Saving dataframe to file: {result_df_filename}")
+    df.to_json(result_df_filename, orient="index")
 

@@ -1,4 +1,4 @@
-import pandas
+import pandas as pd
 from sentence_transformers import SentenceTransformer
 
 
@@ -29,7 +29,8 @@ def normalize_text(text):
 
 
 def run_task(inputs):
-    eb_kg_df = pandas.read_json("../../eb_kg_hq_dataframe", orient="index")
+    eb_kg_df_filename = inputs["dataframe"]["filename"]
+    eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
 
     descriptions = [row['summary'] if row['summary'] is not None else row['description'] for index, row in
                     eb_kg_df.iterrows()]
@@ -38,6 +39,7 @@ def run_task(inputs):
     descriptions = [normalize_text(description) for description in descriptions]
     text_embeddings_new = model.encode(descriptions, show_progress_bar = True)
     eb_kg_df["embedding"] = text_embeddings_new.tolist()
-    result_filename = "../../eb_kg_hq_with_normalised_embeddings_dataframe"
-    print(f"----Saving the final dataframe to {result_filename}----")
-    eb_kg_df.to_json(result_filename, orient="index")
+    # store this dataframe
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    print(f"----Saving the final dataframe to {result_df_filename}----")
+    eb_kg_df.to_json(result_df_filename, orient="index")

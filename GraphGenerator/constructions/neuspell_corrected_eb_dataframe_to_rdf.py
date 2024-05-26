@@ -46,7 +46,7 @@ def run_task(inputs):
         graph = Graph()
         # Load your ontology file into the graph
         graph_filename = input_graph["filename"]
-        graph_filepath = "../../results/" + graph_filename
+        graph_filepath = "results/" + graph_filename
         graph.parse(graph_filepath, format="turtle")
     print("The input graph is loaded!")
 
@@ -58,13 +58,13 @@ def run_task(inputs):
         eb_total_nls_df_with_uris = input_dataframe_with_uri["object"]
     else:
         input_dataframe_with_uri_filename = input_dataframe_with_uri["filename"]
-        input_dataframe_with_uri_filepath = "../dataframe_with_uris/" + input_dataframe_with_uri_filename
+        input_dataframe_with_uri_filepath = "GraphGenerator/dataframe_with_uris/" + input_dataframe_with_uri_filename
         eb_total_nls_df_with_uris = pd.read_json(input_dataframe_with_uri_filepath, orient="index")
 
     eb_dataframes = inputs["dataframes"]
     for dataframe in eb_dataframes:
         filename = dataframe["filename"]
-        file_path = "../../source_dataframes/eb/" + filename
+        file_path = "source_dataframes/eb/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         df = pd.read_json(file_path, orient="index")
 
@@ -83,7 +83,7 @@ def run_task(inputs):
         result_graph_filename = inputs["graph"]["filename"]
 
     # Save the Graph in the RDF Turtle format
-    result_graph_filepath = "../../results/" + result_graph_filename
+    result_graph_filepath = "results/" + result_graph_filename
     print(f"Saving the result graph to {result_graph_filepath}....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Finished saving the result graph!")

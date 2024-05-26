@@ -198,7 +198,7 @@ def run_task(inputs):
         graph = Graph()
         # Load your ontology file into the graph
         graph_filename = input_graph["filename"]
-        graph_filepath = "../../results/" + graph_filename
+        graph_filepath = "results/" + graph_filename
         graph.parse(graph_filepath, format="turtle")
     print("The input graph is loaded!")
 
@@ -212,14 +212,14 @@ def run_task(inputs):
         single_source_dataframe_with_uris = input_dataframe_with_uri["object"]
     else:
         input_dataframe_with_uri_filename = input_dataframe_with_uri["filename"]
-        input_dataframe_with_uri_filepath = "../dataframe_with_uris/" + input_dataframe_with_uri_filename
+        input_dataframe_with_uri_filepath = "GraphGenerator/dataframe_with_uris/" + input_dataframe_with_uri_filename
         single_source_dataframe_with_uris = pd.read_json(input_dataframe_with_uri_filepath, orient="index")
 
     new_terms_dataframe_with_uris_list = []
 
     for dataframe in eb_dataframes:
         filename = dataframe["filename"]
-        file_path = "../../source_dataframes/eb/" + filename
+        file_path = "source_dataframes/eb/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
@@ -241,11 +241,11 @@ def run_task(inputs):
         result_dataframe_with_uris_filename = inputs["results_filenames"]["dataframe_with_uris"]
         result_graph_filename = inputs["results_filenames"]["graph"]
     else:
-        result_dataframe_with_uris_filename = inputs["dataframe_with_uri"]["filename"]
+        result_dataframe_with_uris_filename = inputs["dataframe_with_uris"]["filename"]
         result_graph_filename = inputs["graph"]["filename"]
 
     # store the new dataframe with uris
-    result_dataframe_with_uris_filepath = '../dataframe_with_uris/' + result_dataframe_with_uris_filename
+    result_dataframe_with_uris_filepath = 'GraphGenerator/dataframe_with_uris/' + result_dataframe_with_uris_filename
     print(f"Saving dataframe with uris to {result_dataframe_with_uris_filepath} ....")
     dataframe_with_uris_total.to_json(result_dataframe_with_uris_filepath, orient="index")
     print("Finished saving dataframe!")
@@ -255,7 +255,7 @@ def run_task(inputs):
     print("Finished linking reference terms!")
 
     # Save the Graph in the RDF Turtle format
-    result_graph_filepath = "../../results/" + result_graph_filename
+    result_graph_filepath = "results/" + result_graph_filename
     print(f"Saving the result graph to {result_graph_filepath}....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Finished saving the result graph!")

@@ -1,0 +1,17 @@
+{
+  "tasks": [
+    {
+      "task_name": "nls_dataframe_to_rdf",
+      "inputs": {
+        "collection_name": "Ladies’ Edinburgh Debating Society",
+        "dataframes": [
+          {"agent": "NLS",
+            "filename":"ladies_dataframe"}
+        ],
+        "results_filenames": {
+          "graph": "hto_ladies_nls.ttl"
+        }
+      }
+    }
+  ]
+}

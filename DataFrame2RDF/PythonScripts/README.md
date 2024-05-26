@@ -1,4 +1,4 @@
-# HTO Knowledge Graphs Generator 
+# HTO Knowledge Graphs Generator (Deprecated)
 
 This python code is for generating knowledge graphs for digitised textual heritage based on [Heritage Text Ontology](https://w3id.org/hto).
 Note that this repository does not introduce any methods to extract information from the source digital datasets whose formats

@@ -124,13 +124,14 @@ def link_dbpedia_with_concept(df):
 
 def run_task(inputs):
     print("Reading the source dataframe .....")
-    eb_kg_df = pd.read_json("../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
+    eb_kg_df_filename = inputs["dataframe"]["filename"]
+    eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
     print("Linking dbpedia items.......")
     exception_concept_uris, concept_dbpedia_item_list = link_dbpedia_with_concept(eb_kg_df)
     concept_dbpedia_item_df = pd.DataFrame(concept_dbpedia_item_list)
-    result_file = "concept_dbpedia_dataframe"
-    print(f"Saving the result to file: {result_file}")
-    concept_dbpedia_item_df.to_json(result_file, orient="index")
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    print(f"Saving the result to file: {result_df_filename}")
+    concept_dbpedia_item_df.to_json(result_df_filename, orient="index")
     exception_concept_uris_file = "dbpedia_exception_concept_uris.pkl"
     print(f"Saving the exception concept uris to file: {exception_concept_uris_file}")
     with open(exception_concept_uris_file, 'wb') as f:

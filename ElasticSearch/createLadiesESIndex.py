@@ -2,9 +2,11 @@ from elasticsearch import Elasticsearch
 import pandas as pd
 from tqdm import tqdm
 
+import config
+
 client = Elasticsearch(
-  "https://83a1253d6aac48278867d36eed60b642.us-central1.gcp.cloud.es.io:443",
-  api_key="cmtBajU0MEJiRUoteDA3bmtubEE6bHpVYzFlSWNUSXFWcG8tbHFnOUFxQQ=="
+  config.ELASTIC_HOST,
+  api_key=config.ELASTIC_API_KEY
 )
 
 eb_index = "ladies"

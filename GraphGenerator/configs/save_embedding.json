@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "task_name": "save_embedding",
+      "inputs": {
+        "dataframe": {
+          "filename":"eb_kg_hq_dataframe"
+        },
+        "results_filenames": {
+          "dataframe": "test_eb_kg_hq_dataframe_with_embeddings"
+        }
+      }
+    }
+  ]
+}
