@@ -59,12 +59,14 @@ topic_model = BERTopic(
     calculate_probabilities=True,
     verbose=True)
 
-def run_task(inputs):
-    eb_kg_hq_dataframe = pd.read_json("/eb_kg_hq_with_normalised_embeddings_dataframe", orient="index")
-    descriptions = [row['summary'] if row['summary'] is not None else row['description'] for index, row in
-                    eb_kg_hq_dataframe.iterrows()]
 
-    embeddings = np.array([np.array(x) for x in eb_kg_hq_dataframe['embedding']])
+def run_task(inputs):
+    eb_kg_df_filename = inputs["dataframe"]["filename"]
+    eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
+    descriptions = [row['summary'] if row['summary'] is not None else row['description'] for index, row in
+                    eb_kg_df.iterrows()]
+
+    embeddings = np.array([np.array(x) for x in eb_kg_df['embedding']])
     print("fit transform")
     topics, probs = topic_model.fit_transform(descriptions, embeddings)
 
@@ -79,8 +81,8 @@ def run_task(inputs):
 
     eb_topic_list = []
     print(f"Creating result dataframe.....")
-    for index in range(len(eb_kg_hq_dataframe)):
-        term_uri = eb_kg_hq_dataframe.loc[index, 'term_uri']
+    for index in range(len(eb_kg_df)):
+        term_uri = eb_kg_df.loc[index, 'term_uri']
         topic_num = topics[index]
         topic_info = topic_model.get_topic_info(topic_num)
         topic_count = topic_info['Count']
@@ -88,13 +90,12 @@ def run_task(inputs):
         topic_representation = topic_info['Representation']
         eb_topic_list.append([term_uri, topic_num, topic_count, topic_name, topic_representation])
 
-    eb_topic_df = pd.DataFrame(eb_topic_list, columns=["term_uri", "topic_num", "topic_count", "topic_name", "topic_representation"])
-
-    result_df_file = "eb_topic_dataframe"
-    print(f"Saving result dataframe to {result_df_file}")
-    eb_topic_df.to_json(result_df_file, orient="index")
-
-    result_topic_model_dir = "eb_topic_model_dir"
+    eb_topic_df = pd.DataFrame(eb_topic_list,
+                               columns=["term_uri", "topic_num", "topic_count", "topic_name", "topic_representation"])
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    print(f"Saving result dataframe to {result_df_filename}")
+    eb_topic_df.to_json(result_df_filename, orient="index")
+    result_topic_model_dir = inputs["results_filenames"]["topic_model"]
     print(f"Saving topic model to {result_topic_model_dir}")
     # Serialization
     topic_model.save("eb_topic_model_dir", serialization="safetensors", save_ctfidf=True,

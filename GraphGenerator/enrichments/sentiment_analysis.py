@@ -14,14 +14,14 @@ def get_sentiment_result(description):
 
 
 def run_task(inputs):
-    eb_kg_hq_dataframe = pd.read_json("eb_kg_hq_dataframe", orient="index")
-    eb_kg_hq_dataframe = eb_kg_hq_dataframe
+    eb_kg_df_filename = inputs["dataframe"]["filename"]
+    eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
 
     tqdm.pandas(desc="Processing sentiment analysis!")
-    eb_kg_hq_dataframe["sentiment"] = eb_kg_hq_dataframe['description'].progress_apply(
+    eb_kg_df["sentiment"] = eb_kg_df['description'].progress_apply(
         lambda description: get_sentiment_result(description))
 
-    term_sentiment_dataframe = eb_kg_hq_dataframe[['term_uri', 'sentiment']]
-    result_file = "term_sentiment_dataframe"
-    print(f"Saving the result to file: {result_file}")
-    term_sentiment_dataframe.to_json(result_file, orient="index")
+    term_sentiment_dataframe = eb_kg_df[['term_uri', 'sentiment']]
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    print(f"Saving the result to file: {result_df_filename}")
+    term_sentiment_dataframe.to_json(result_df_filename, orient="index")
