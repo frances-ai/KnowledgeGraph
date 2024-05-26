@@ -1,3 +1,5 @@
+import re
+
 import pandas as pd
 from rdflib import Graph, URIRef, RDFS
 from rdflib import Literal, XSD, RDF
@@ -11,18 +13,17 @@ graph = Graph()
 ontology_file = "hto.ttl"
 graph.parse(ontology_file, format="turtle")
 
+NON_AZ_REGEXP = re.compile("[^A-Za-z0-9]")
 
-def create_collection():
-    collection = URIRef("https://w3id.org/hto/WorkCollection/ChapbooksOfScotland")
+
+def create_collection(collection_name, id_name):
+    collection = URIRef("https://w3id.org/hto/WorkCollection/" + id_name)
     graph.add((collection, RDF.type, hto.WorkCollection))
-    graph.add((collection, hto.name, Literal("Chapbooks printed in Scotland Collection", datatype=XSD.string)))
+    graph.add((collection, hto.name, Literal(collection_name, datatype=XSD.string)))
     return collection
 
 
-collection = create_collection()
-
-
-def series2rdf(series_info):
+def series2rdf(series_info, collection):
     # create triples with general datatype
     series = URIRef("https://w3id.org/hto/Series/" + str(series_info["MMSID"]))
     series_title = str(series_info["serieTitle"])
@@ -163,7 +164,7 @@ def volume2rdf(volume_info, series):
     return volume
 
 
-def dataframe_to_rdf(dataframe, agent_uri, agent, chapbook_dataset):
+def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
     dataframe = dataframe.fillna(0)
     # create triples
     series_mmsids = dataframe["MMSID"].unique()
@@ -171,7 +172,7 @@ def dataframe_to_rdf(dataframe, agent_uri, agent, chapbook_dataset):
         df_series = dataframe[dataframe["MMSID"] == mmsid].reset_index(drop=True)
         edition_info = df_series.loc[0]
         #print(edition_info["serieTitle"])
-        edition_ref = series2rdf(edition_info)
+        edition_ref = series2rdf(edition_info, collection)
 
         # VOLUMES
         vol_numbers = df_series["volumeNum"].unique()
@@ -229,24 +230,26 @@ def dataframe_to_rdf(dataframe, agent_uri, agent, chapbook_dataset):
 
 
 def run_task(inputs):
-    print("---- Start the chapbook dataframe to rdf task ----")
-    chapbook_dataframes = inputs["dataframes"]
+    print("---- Start the nls dataframe to rdf task ----")
+    nls_dataframes = inputs["dataframes"]
     # dataframe = [{"agent": "NLS", "filename": ""}]
-
+    collection_name = inputs["collection_name"]
+    collection_id_name = re.sub(NON_AZ_REGEXP, '', collection_name)
+    collection = create_collection(collection_name, collection_id_name)
     # add software agents to graph
     software_list = [defoe, frances_information_extraction]
     add_software(software_list, graph)
 
-    for dataframe in chapbook_dataframes:
+    for dataframe in nls_dataframes:
         filename = dataframe["filename"]
-        file_path = "source_dataframes/chapbooks/" + filename
+        file_path = "source_dataframes/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
-        eb_dataset = create_dataset("chapbook", agent_uri, agent, graph)
+        eb_dataset = create_dataset(collection_id_name, agent_uri, agent, graph)
         df = pd.read_json(file_path, orient="index")
 
-        dataframe_to_rdf(df, agent_uri, agent, eb_dataset)
+        dataframe_to_rdf(collection, df, agent_uri, agent, eb_dataset)
 
         print(f"Finished parsing dataframe {filename} to graph!")
 
