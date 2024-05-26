@@ -367,7 +367,6 @@ def run_task(inputs):
         agent_uri = create_organization(agent, graph)
         eb_dataset = create_dataset("eb", agent_uri, agent, graph)
         df = pd.read_json(file_path, orient="index")
-        df = df[:100]
         if agent == "NLS":
             df.rename(columns={"relatedTerms": "reference_terms", "typeTerm": "termType", "positionPage": "position", "altoXML": "filePath"},
                       inplace=True)
