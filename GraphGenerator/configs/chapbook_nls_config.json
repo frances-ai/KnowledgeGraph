@@ -1,0 +1,17 @@
+{
+  "tasks": [
+    {
+      "task_name": "nls_dataframe_to_rdf",
+      "inputs": {
+        "collection_name": "Chapbooks printed in Scotland",
+        "dataframes": [
+          {"agent": "NLS",
+            "filename":"chapbook/chapbooks_dataframe"}
+        ],
+        "results_filenames": {
+          "graph": "test_hto_chapbooks_nls.ttl"
+        }
+      }
+    }
+  ]
+}

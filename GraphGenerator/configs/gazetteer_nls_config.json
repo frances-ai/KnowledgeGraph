@@ -1,0 +1,17 @@
+{
+  "tasks": [
+    {
+      "task_name": "nls_dataframe_to_rdf",
+      "inputs": {
+        "collection_name": "Gazetteers of Scotland",
+        "dataframes": [
+          {"agent": "NLS",
+            "filename":"gazetteers_dataframe"}
+        ],
+        "results_filenames": {
+          "graph": "hto_gazetteers_nls.ttl"
+        }
+      }
+    }
+  ]
+}

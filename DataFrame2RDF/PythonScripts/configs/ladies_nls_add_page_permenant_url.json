@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "task_name": "add_page_permanent_url",
+      "inputs": {
+        "graph": {
+          "filename": "hto_ladies_nls.ttl"
+        },
+        "results_filenames": {
+          "graph": "hto_ladies_nls_page_urls.ttl"
+        },
+        "json_filename": "/Users/ly40/Documents/PhD/KnowledgeGraph/source_dataframes/ladies/volume_page_urls.json"
+      }
+    }
+  ]
+}

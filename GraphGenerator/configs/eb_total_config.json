@@ -42,8 +42,8 @@
           }
         ],
         "results_filenames": {
-          "dataframe_with_uris": "eb_total_dataframe_uris",
-          "graph": "hto_eb_total.ttl"
+          "dataframe_with_uris": "test_eb_total_dataframe_uris",
+          "graph": "test_hto_eb_total.ttl"
         }
       }
     },
@@ -57,7 +57,7 @@
           },
           {
             "agent": "NCKP",
-            "filename": "nckp_final_eb_7_dataframe_clean_Damon_with_uris"
+            "filename": "nckp_final_eb_7_dataframe_clean_Damon"
           }
         ]
       }
