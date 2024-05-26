@@ -37,20 +37,22 @@ structure will be:
 
 ```
 .
-├── DataFrame2RDF
+├── GraphGenerator
 │   ├── dataframe_with_uris
-│   └── PythonScripts
-│       ├── configs
-│       │   ├── chapbook_nls_config.json
-│       │   ├── eb_1_hq_config.json
-│       │   ├── ......
-│       ├── chapbook_dataframe_to_rdf.py
-│       ├── merge_graphs.py
+│   ├── configs
+│       ├── chapbook_nls_config.json
+│       ├── eb_1_hq_config.json
+│       ├── ......
+│   ├── constructions
 │       ├── multiple_source_eb_dataframe_to_rdf.py
-│       ├── run_tasks.py
-│       ├── similar_terms.py
 │       ├── single_source_eb_dataframe_to_rdf.py
+│       ├── ......
+│   ├── enrichments
 │       ├── summary.py
+│       ├── sentiment_analysis.py
+│       ├── ......
+│   └── PythonScripts
+│       ├── run_tasks.py
 │       └── utils.py
 ├── hto.ttl
 ├── requirements.txt
@@ -61,24 +63,34 @@ structure will be:
 #### Step 4: Create task configuration json file. 
 
 This file will be passed as an argument when we run the `run_tasks.py`, it will 
-tell the program what tasks should execute, what's the inputs and outputs of tasks. So far, we have **implemented 6 tasks executors**:
+tell the program what tasks should execute, what's the inputs and outputs of tasks. So far, we have **implemented 11 tasks executors**:
+
+Construction tasks:
     
-1. [single_source_eb_dataframe_to_rdf](DataFrame2RDF/PythonScripts/single_source_eb_dataframe_to_rdf.py): generates a graph for Encyclopaedia Britannica (EB) using a list of dataframe. Each term in the 
+1. [single_source_eb_dataframe_to_rdf](GraphGenerator/constructions/single_source_eb_dataframe_to_rdf.py): generates a graph for Encyclopaedia Britannica (EB) using a list of dataframe. Each term in the 
 dataframe was extract from single source. For example, this task can deal with the dataframe list with: first edition dataframe extracted from Ash's work, and seven edition from 
 National Library of Scotland (NLS). However, it should not be used to process the list with seven edition from NLS, and 
 [Knowledge Project ](https://tu-plogan.github.io/source/r_releases.html), because it will ignore all terms in that edition if the edition
 has been added to the graph. In this case, it should be handled in the next task `multiple_source_eb_dataframe_to_rdf`.
 
-2. [multiple_source_eb_dataframe_to_rdf](DataFrame2RDF/PythonScripts/multiple_source_eb_dataframe_to_rdf.py): adds descriptions and extract information of terms in EB extracted from multiple sources.
-3. [chapbook_dataframe_to_rdf](DataFrame2RDF/PythonScripts/chapbook_dataframe_to_rdf.py): generates a graph for Chapbooks using a list of dataframe.
-4. [merge_graphs](DataFrame2RDF/PythonScripts/merge_graphs.py): merges graphs for different collections into one graph.
-5. [summary](DataFrame2RDF/PythonScripts/summary.py): adds summaries of topic terms descriptions to a graph.
-6. [similar_terms](DataFrame2RDF/PythonScripts/similar_terms.py): linking similar terms in a graph.
+2. [multiple_source_eb_dataframe_to_rdf](GraphGenerator/constructions/multiple_source_eb_dataframe_to_rdf.py): adds descriptions and extract information of terms in EB extracted from multiple sources.
+3. [neuspell_corrected_eb_dataframe_to_rdf](GraphGenerator/constructions/neuspell_corrected_eb_dataframe_to_rdf.py): adds descriptions and extract information of terms in EB corrected using Neuspell.
+4. [nls_dataframe_to_rdf](GraphGenerator/constructions/nls_dataframe_to_rdf.py): generates a graph for other NLS collection using a list of dataframe.
+5. [add_page_permanent_url](GraphGenerator/constructions/add_page_permanent_url.py): adds page permanent url into the graph. This works for any NLS collection.
 
-More details of the tasks can be found [here](DataFrame2RDF/PythonScripts/README.md)
+
+Enrichment tasks:
+1. [summary](GraphGenerator/enrichments/summary.py): adds summaries of topic terms descriptions to a graph.
+2. [save_embedding](GraphGenerator/enrichments/save_embedding.py): generate embeddings for terms with their highest quality descriptions, save the result in a dataframe.
+3. [sentiment_analysis](GraphGenerator/enrichments/sentiment_analysis.py): generate binary sentiment labels for terms, save the result in a dataframe.
+4. [term_record_linkage](GraphGenerator/enrichments/term_record_linkage.py): links terms across editions by grouping them into concepts, save the result in a dataframe.
+5. [wikidata_linkage](GraphGenerator/enrichments/wikidata_linkage.py): Adds Wikidata items to concepts created from [term_record_linkage](GraphGenerator/enrichments/term_record_linkage.py) task.
+6. [dbpedia_linkage](GraphGenerator/enrichments/dbpedia_linkage.py): Adds Dbpedia items to concepts created from [term_record_linkage](GraphGenerator/enrichments/term_record_linkage.py) task.
+
+More details of the tasks can be found [here](GraphGenerator/README.md)
 
 The config file below tells the program to first generate a graph for 7th edition EB from the knowledge project, and then 
-add summaries to the graph. More examples can be found [here](DataFrame2RDF/PythonScripts/configs)
+add summaries to the graph. More examples can be found [here](GraphGenerator/configs)
 
 ```json
 {
@@ -110,10 +122,10 @@ add summaries to the graph. More examples can be found [here](DataFrame2RDF/Pyth
 
 #### Step 5: Run the tasks
 
-In command line, navigate to this folder `DataFrame2RDF/PythonScripts`, and then run the python file `run_tasks.py`.
+In command line, run the python file `run_tasks.py`.
 ```
-cd DataFrame2RDF/PythonScripts
-python run_tasks.py --config_file=<path_to_your_config_file>
+python -m GraphGenerator.run_tasks --config_file=<path_to_your_config_file>
+# exmaple: python -m GraphGenerator.run_tasks --config_file=GraphGenerator/configs/eb_total_config.json
 ```
 
 The final graph file can be found `results` folder. 
@@ -121,6 +133,6 @@ The final graph file can be found `results` folder.
 We have generated some [knowledge graphs](https://universityofstandrews907-my.sharepoint.com/:f:/g/personal/ly40_st-andrews_ac_uk/ElagHP1K_6JJlE9ybROuuVsBsSV8m849oi-a9OPUS5lWFA?e=jJoRuD)
 
 
-#### Explore the graph using [this notebook](KnowledgeExploration.ipynb)
+#### Explore the graph using [this notebook](KnowledgeExplorationRemote.ipynb)
 
 
