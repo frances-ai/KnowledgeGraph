@@ -19,6 +19,7 @@ NON_AZ_REGEXP = re.compile("[^A-Za-z0-9]")
 def create_collection(collection_name, id_name):
     collection = URIRef("https://w3id.org/hto/WorkCollection/" + id_name)
     graph.add((collection, RDF.type, hto.WorkCollection))
+    collection_name = collection_name + " Collection"
     graph.add((collection, hto.name, Literal(collection_name, datatype=XSD.string)))
     return collection
 
@@ -35,9 +36,8 @@ def series2rdf(series_info, collection):
     if series_sub_title != "0":
         graph.add((series, hto.subtitle, Literal(series_sub_title, datatype=XSD.string)))
 
-    publish_year = str(series_info["year"])
-    if publish_year != "0":
-        graph.add((series, hto.yearPublished, Literal(publish_year, datatype=XSD.int)))
+    publish_year = int(series_info["year"])
+    graph.add((series, hto.yearPublished, Literal(publish_year, datatype=XSD.int)))
     # create a Location instance for printing place
     place_name = str(series_info["place"])
     if place_name != "0":
@@ -156,7 +156,7 @@ def volume2rdf(volume_info, series):
     permanentURL = URIRef(str(volume_info["permanentURL"]))
     graph.add((permanentURL, RDF.type, hto.Location))
     graph.add((volume, hto.permanentURL, permanentURL))
-    # graph.add((volume, hto.numberOfPages, Literal(volume_info["numberOfPages"], datatype=XSD.integer)))
+    graph.add((volume, hto.numberOfPages, Literal(volume_info["numberOfPages"], datatype=XSD.integer)))
     graph.add((series, RDF.type, hto.WorkCollection))
     graph.add((series, hto.hadMember, volume))
     graph.add((volume, hto.wasMemberOf, series))
@@ -208,9 +208,11 @@ def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
                 # source_path_ref = URIRef("https://w3id.org/eb/Location/" + source_path_name)
                 # graph.add((source_path_ref, RDF.type, PROV.Location))
                 # source
-                source_name = df_page["altoXML"].replace("/", "_").replace(".", "_")
+                source_filepath = str(df_page["altoXML"])
+                source_name = source_filepath.replace("/", "_").replace(".", "_")
                 source_ref = URIRef("https://w3id.org/hto/InformationResource/" + source_name)
                 graph.add((source_ref, RDF.type, hto.InformationResource))
+                graph.add((source_ref, PROV.value, Literal(source_filepath, datatype=XSD.string)))
                 graph.add((chapbook_dataset, hto.hadMember, source_ref))
                 # graph.add((source_ref, PROV.atLocation, source_path_ref))
                 # related agent and activity

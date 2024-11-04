@@ -133,6 +133,13 @@ The final graph file can be found `results` folder.
 We have generated some [knowledge graphs](https://universityofstandrews907-my.sharepoint.com/:f:/g/personal/ly40_st-andrews_ac_uk/ElagHP1K_6JJlE9ybROuuVsBsSV8m849oi-a9OPUS5lWFA?e=jJoRuD)
 
 
-#### Explore the graph using [this notebook](KnowledgeExplorationRemote.ipynb)
+## Upload graphs to Fuseki Server
+
+Jena Fuseki Server allows storing and querying RDF based knowledge graphs. To build Fuskei server, 
+see [official documentation](https://jena.apache.org/documentation/fuseki2/). A quick start point can be the 
+[published docker image](https://hub.docker.com/r/stain/jena-fuseki).
+
+
+## Explore the graph using [this notebook](KnowledgeExplorationRemote.ipynb)
 
 

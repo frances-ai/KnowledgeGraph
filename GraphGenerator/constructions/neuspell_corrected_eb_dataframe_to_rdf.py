@@ -1,5 +1,5 @@
 import pandas as pd
-from rdflib import Graph, RDF, URIRef, RDF, Literal, XSD, PROV
+from rdflib import Graph, RDF, URIRef, RDF, Literal, XSD, PROV, FOAF
 
 from ..utils import remove_extra_spaces, hto, get_term_id_from_uri
 
@@ -46,11 +46,12 @@ def run_task(inputs):
         graph = Graph()
         # Load your ontology file into the graph
         graph_filename = input_graph["filename"]
-        graph_filepath = "results/" + graph_filename
+        graph_filepath = graph_filename
         graph.parse(graph_filepath, format="turtle")
     print("The input graph is loaded!")
 
     graph.add((neuspell, RDF.type, hto.SoftwareAgent))
+    graph.add((neuspell, FOAF.name, Literal("Neuspell", datatype=XSD.string)))
 
     # load dataframe_with_uris generated from eb_total_nls_df_with_uris task
     input_dataframe_with_uri = inputs["dataframe_with_uris"]
