@@ -1,8 +1,8 @@
 import argparse
 import json
-from .utils import load_name_map, save_name_map
+from .utils import load_name_map, save_name_map, name_to_uri_name
 from .constructions import single_source_eb_dataframe_to_rdf, multiple_source_eb_dataframe_to_rdf, \
-    neuspell_corrected_eb_dataframe_to_rdf, add_page_permanent_url, nls_dataframe_to_rdf
+    neuspell_corrected_eb_dataframe_to_rdf, add_page_permanent_url, nls_dataframe_to_rdf, merge_graphs
 from .enrichments import summary, save_embedding, term_record_linkage, wikidata_linkage, \
     sentiment_analysis, dbpedia_linkage
 
@@ -13,6 +13,7 @@ task_executors = {
     "nls_dataframe_to_rdf": nls_dataframe_to_rdf.run_task,
     "neuspell_corrected_eb_dataframe_to_rdf": neuspell_corrected_eb_dataframe_to_rdf.run_task,
     "add_page_permanent_url": add_page_permanent_url.run_task,
+    "merge_graphs": merge_graphs.run_task,
     "summary": summary.run_task,
     "save_embedding": save_embedding.run_task,
     "term_record_linkage":term_record_linkage.run_task,
@@ -65,7 +66,7 @@ def run_tasks(config):
 
 
 if __name__ == "__main__":
-    name_map_file = "name_map.pickle"
+    name_map_file = "/Users/ly40/Documents/PhD/KnowledgeGraph/GraphGenerator/name_map.pickle"
     load_name_map(name_map_file)
     args, remaining = parse_common_args()
     config = read_config(args.config_file)
