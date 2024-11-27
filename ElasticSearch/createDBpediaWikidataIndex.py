@@ -4,8 +4,9 @@ from tqdm import tqdm
 import config
 
 client = Elasticsearch(
-  config.ELASTIC_HOST,
-  api_key=config.ELASTIC_API_KEY
+    config.ELASTIC_HOST,
+    ca_certs=config.CA_CERT,
+    api_key=config.ELASTIC_API_KEY
 )
 
 index = "dbpedia_items"
