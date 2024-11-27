@@ -71,23 +71,26 @@ def load_name_map(filepath):
             global name_map
             name_map = pickle.load(f)
     except FileNotFoundError:
+        print("file not found")
         name_map = {}
 
 
 hto = Namespace("https://w3id.org/hto#")
 
 agents = {
-    "NCKP": ["Nineteenth-Century Knowledge Project", hto.Organization],
-    "Ash": ["Ash Charlton", hto.Person],
-    "NLS": ["National Library of Scotland", hto.Organization]
+    "NCKP": ["Nineteenth-Century Knowledge Project", hto.Organization, 'https://tu-plogan.github.io'],
+    "Ash": ["Ash Charlton", hto.Person, 'https://scholar.google.com/citations?user=-IIqUJ8AAAAJ&hl=en'],
+    "NLS": ["National Library of Scotland", hto.Organization, 'https://www.nls.uk']
 }
 
 
+#TODO fix bug: create uri based on their type
 def create_organization(agent, graph):
     agent_uri = URIRef("https://w3id.org/hto/Organization/" + agent)
     if (agent_uri, RDF.type, agents[agent][1]) in graph:
         return agent_uri
     graph.add((agent_uri, RDF.type, agents[agent][1]))
+    graph.add((agent_uri, FOAF.homepage, URIRef(agents[agent][2])))
     graph.add((agent_uri, FOAF.name, Literal(agents[agent][0], datatype=XSD.string)))
     return agent_uri
 
