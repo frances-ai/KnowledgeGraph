@@ -10,8 +10,6 @@ import os
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-extractive_model = TransformerSummarizer(transformer_type="XLNet", transformer_model_key="xlnet-base-cased")
-
 
 def reduce_text_size(text):
     MAX_SENTENCES = 100
@@ -25,7 +23,7 @@ def reduce_text_size(text):
         return text
 
 
-def summarize_text_extractive(text):
+def summarize_text_extractive(text, extractive_model):
     text = reduce_text_size(text)
     summary = ''.join(extractive_model(text, min_length=60, max_length=300))
     return summary
@@ -58,6 +56,7 @@ def get_description_uris_list(graph):
 
 
 def run_task(inputs):
+    extractive_model = TransformerSummarizer(transformer_type="XLNet", transformer_model_key="xlnet-base-cased")
     print("---- Start summary task ----")
     print("Loading the input graph....")
     input_graph = inputs["graph"]

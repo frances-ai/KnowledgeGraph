@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "ladies"
+index = "hto_ladies"
 
 settings = {
     "analysis": {
@@ -53,8 +53,6 @@ mappings = {
                      }
                  }
                  },
-        "alter_names": {"type": "text"},
-        "term_type": {"type": "keyword"},
         "page_num": {"type": "integer"},
         "description": {"type": "text"},
         "description_uri": {"type": "keyword"},

@@ -42,9 +42,12 @@ wikidata_sparql = SPARQLWrapper(endpoint=wikidata_endpoint_url, agent=user_agent
 
 def get_wikidata_item_by_name(item_name):
     # Inverts a name from the format 'Last, Prefix' to 'Prefix Last'.
-    item_name = invert_name(item_name)
     items = []
     item_valid_names = [item_name.title(), item_name.lower()]
+    inverted_name = invert_name(item_name)
+    if inverted_name != item_name:
+        item_valid_names.append(inverted_name.title())
+        item_valid_names.append(inverted_name.lower())
     for item_valid_name in item_valid_names:
         wd_term_search_query = """
         SELECT distinct ?item ?itemDescription ?article WHERE{
@@ -79,7 +82,7 @@ def get_most_similar_item(query_embedding, wiki_items):
 def link_wikidata_with_concept(df):
     concept_uris = df["concept_uri"].unique()
     all_searched_wiki_items = {}
-    concept_wiki_item_list = []
+    concept_wiki_items = {}
     exception_concept_uris = []
     for concept_uri in tqdm(concept_uris):
         terms_df = df[df["concept_uri"] == concept_uri]
@@ -110,25 +113,39 @@ def link_wikidata_with_concept(df):
         if len(wiki_items) > 0:
             score, most_similar_wiki_item = get_most_similar_item(embedding, wiki_items)
             #print(most_similar_wiki_item["description"])
+            item_uri = most_similar_wiki_item["uri"]
             if score > 0.4:
-                concept_wiki_item_list.append({
-                    "concept_uri": concept_uri,
-                    "item_uri":  most_similar_wiki_item["uri"],
-                    "item_description": most_similar_wiki_item["description"],
-                    "similar_score": score,
-                    "embedding": most_similar_wiki_item["embedding"]
-                })
+                # check if wiki item has been added
+                if item_uri in concept_wiki_items:
+                    existing_wiki_item_record = concept_wiki_items[item_uri]
+                    if existing_wiki_item_record["max_score"] < score:
+                        concept_wiki_items[item_uri] = {
+                            "concept_uri": concept_uri,
+                            "item_uri":  item_uri,
+                            "item_description": most_similar_wiki_item["description"],
+                            "max_score": score,
+                            "embedding": most_similar_wiki_item["embedding"]
+                        }
+                else:
+                    concept_wiki_items[item_uri] = {
+                        "concept_uri": concept_uri,
+                        "item_uri": item_uri,
+                        "item_description": most_similar_wiki_item["description"],
+                        "max_score": score,
+                        "embedding": most_similar_wiki_item["embedding"]
+                    }
 
-    return exception_concept_uris, concept_wiki_item_list
+    return exception_concept_uris, concept_wiki_items
 
 
 if __name__ == "__main__":
     print("Reading the source dataframe .....")
     eb_kg_df = pd.read_json("../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
     print("Linking wikidata items.......")
-    exception_concept_uris, concept_wiki_item_list = link_wikidata_with_concept(eb_kg_df)
+    exception_concept_uris, concept_wiki_items = link_wikidata_with_concept(eb_kg_df)
+    concept_wiki_item_list = list(concept_wiki_items.values())
     concept_wiki_item_df = pd.DataFrame(concept_wiki_item_list)
-    result_file = "concept_wikidata_dataframe"
+    result_file = "concept_wikidata_dataframe_v2"
     print(f"Saving the result to file: {result_file}")
     concept_wiki_item_df.to_json(result_file, orient="index")
     exception_concept_uris_file = "exception_concept_uris.pkl"

@@ -8,6 +8,17 @@ from tqdm import tqdm
 
 import re
 
+import string
+import regex
+
+
+def normalize_name(name):
+    name = regex.sub(r'[^\p{L}\s\-\'\,\.\’]', '', name)
+    name = regex.sub(r'\n', '', name)
+    name = string.capwords(name)
+    return name
+
+
 NON_AZ09_REGEXP = regex.compile('[^\p{L}\p{N}]')
 MAX_SIZE_NAMES = 10000000000
 
@@ -76,6 +87,8 @@ def load_name_map(filepath):
 
 
 hto = Namespace("https://w3id.org/hto#")
+# define namespaces
+crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
 
 agents = {
     "NCKP": ["Nineteenth-Century Knowledge Project", hto.Organization, 'https://tu-plogan.github.io'],
@@ -104,6 +117,22 @@ def create_dataset(collection_short_name, agent_uri, agent, graph):
 
     # Create digitalising activity
     digitalising_activity = URIRef("https://w3id.org/hto/Activity/" + agent + "_digitalising_activity")
+    graph.add((digitalising_activity, RDF.type, hto.Activity))
+    graph.add((digitalising_activity, PROV.generated, dataset))
+    graph.add((digitalising_activity, PROV.wasAssociatedWith, agent_uri))
+    graph.add((dataset, PROV.wasGeneratedBy, digitalising_activity))
+    return dataset
+
+
+def create_dataset_with_id(dataset_id, agent_uri, graph):
+    dataset = URIRef("https://w3id.org/hto/Collection/" + dataset_id)
+    if (dataset, RDF.type, PROV.Collection) in graph:
+        return dataset
+    graph.add((dataset, RDF.type, PROV.Collection))
+    graph.add((dataset, PROV.wasAttributedTo, agent_uri))
+
+    # Create digitalising activity
+    digitalising_activity = URIRef("https://w3id.org/hto/Activity/" + dataset_id + "_digitalising_activity")
     graph.add((digitalising_activity, RDF.type, hto.Activity))
     graph.add((digitalising_activity, PROV.generated, dataset))
     graph.add((digitalising_activity, PROV.wasAssociatedWith, agent_uri))

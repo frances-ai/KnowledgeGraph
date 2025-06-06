@@ -3,7 +3,7 @@ import pandas as pd
 from rdflib import Literal, XSD, RDF, RDFS
 from ..utils import name_to_uri_name, get_source_ref, link_entity_with_software, hto, create_organization, \
     create_dataset, link_reference_terms, add_software, get_term_class_name_and_term_ref, defoe, \
-    frances_information_extraction, ABBYYFineReader
+    frances_information_extraction, ABBYYFineReader, normalize_name
 
 # Create a new RDFLib Graph
 graph = Graph()
@@ -73,6 +73,7 @@ def edition2rdf(edition_info):
     graph.add((edition, hto.yearPublished, Literal(int(edition_info["year"]), datatype=XSD.int)))
     # create a Location instance for printing place
     place_name = str(edition_info["place"])
+    place_name = normalize_name(place_name)
     place_uri_name = name_to_uri_name(place_name)
     place = URIRef("https://w3id.org/hto/Location/" + place_uri_name)
     graph.add((place, RDF.type, hto.Location))
@@ -383,7 +384,7 @@ def run_task(inputs):
     dataframe_with_uris_filepath = 'GraphGenerator/dataframe_with_uris/' + result_dataframe_with_uris_filename
     # store the new dataframe with uris
     print(f"Saving dataframe with uris to {dataframe_with_uris_filepath} ....")
-    dataframe_with_uris_total.to_json(dataframe_with_uris_filepath, orient="index")
+    dataframe_with_uris_total.to_json(dataframe_with_uris_filepath, orient="index", dtype={'MMSID': str})
     print("Finished saving dataframe!")
 
     print("Linking reference terms.....")

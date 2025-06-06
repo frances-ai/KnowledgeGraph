@@ -5,7 +5,7 @@ from rdflib import Graph, URIRef, RDFS
 from rdflib import Literal, XSD, RDF
 from rdflib.namespace import FOAF, PROV, SDO
 from ..utils import hto, name_to_uri_name, frances_information_extraction, defoe, add_software, create_organization, \
-    create_dataset
+    create_dataset, normalize_name
 
 # Create a new RDFLib Graph
 graph = Graph()
@@ -40,6 +40,7 @@ def series2rdf(series_info, collection):
     graph.add((series, hto.yearPublished, Literal(publish_year, datatype=XSD.int)))
     # create a Location instance for printing place
     place_name = str(series_info["place"])
+    place_name = normalize_name(place_name)
     if place_name != "0":
         place_uri_name = name_to_uri_name(place_name)
         place = URIRef("https://w3id.org/hto/Location/" + place_uri_name)
@@ -249,7 +250,7 @@ def run_task(inputs):
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
         eb_dataset = create_dataset(collection_id_name, agent_uri, agent, graph)
-        df = pd.read_json(file_path, orient="index")
+        df = pd.read_json(file_path, orient="index", dtype={'MMSID': str})
 
         dataframe_to_rdf(collection, df, agent_uri, agent, eb_dataset)
 

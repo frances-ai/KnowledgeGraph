@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "gazetteers"
+index = "hto_gazetteers"
 
 settings = {
     "analysis": {

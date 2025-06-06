@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-eb_index = "eb"
+eb_index = "hto_eb"
 
 eb_settings = {
     "analysis": {

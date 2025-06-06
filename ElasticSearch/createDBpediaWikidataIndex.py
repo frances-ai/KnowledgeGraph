@@ -26,28 +26,15 @@ mapping = {
 }
 
 
-def group_by_item(concept_dataframe):
-    grouped = concept_dataframe.groupby('item_uri')
-    df = pd.DataFrame({
-        'item_uri': [name for name, _ in grouped],
-        'item_description': [group['item_description'].iloc[0] for name, group in grouped],
-        'embedding': [group['embedding'].iloc[0] for name, group in grouped],  # Directly taking the first list
-        'concept_uri': [group['concept_uri'].tolist() for name, group in grouped]
-    })
-    return df
-
-
 if __name__ == "__main__":
     # Load the dataframe
-    concept_df = pd.read_json("concept_dbpedia_dataframe", orient="index")
-
+    concept_df = pd.read_json("../KnowledgeEnrichment/concept_dbpedia_dataframe_v2", orient="index")
+    concept_df.drop(columns=["max_score"], inplace=True)
     # Create the index with the defined mapping
     if not client.indices.exists(index=index):
         client.indices.create(index=index, body=mapping)
 
-    # group by items
-    items_df = group_by_item(concept_df)
-    items_list = items_df.to_dict('records')
+    items_list = concept_df.to_dict('records')
     total = len(items_list)
     count = 0
     with tqdm(total=total, desc="Ingestion Progress", unit="step") as pbar:

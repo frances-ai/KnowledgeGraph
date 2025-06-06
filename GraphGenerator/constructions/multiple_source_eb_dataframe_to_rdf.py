@@ -247,7 +247,7 @@ def run_task(inputs):
     # store the new dataframe with uris
     result_dataframe_with_uris_filepath = 'GraphGenerator/dataframe_with_uris/' + result_dataframe_with_uris_filename
     print(f"Saving dataframe with uris to {result_dataframe_with_uris_filepath} ....")
-    dataframe_with_uris_total.to_json(result_dataframe_with_uris_filepath, orient="index")
+    dataframe_with_uris_total.to_json(result_dataframe_with_uris_filepath, orient="index", dtype={'MMSID': str})
     print("Finished saving dataframe!")
 
     print("Linking reference terms.....")
