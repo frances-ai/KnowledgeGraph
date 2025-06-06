@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "hto_gazetteers"
+index = "hto_broadsides"
 
 settings = {
     "analysis": {
@@ -38,7 +38,7 @@ settings = {
 
 mappings = {
     "properties": {
-        "collection": {"type": "constant_keyword", "value": "Gazetteers of Scotland"},
+        "collection": {"type": "constant_keyword", "value": "Broadsides printed in Scotland"},
         "series_uri": {"type": "keyword"},
         "vol_num": {"type": "integer"},
         "vol_title": {"type": "keyword"},
@@ -53,8 +53,6 @@ mappings = {
                      }
                  }
                  },
-        "alter_names": {"type": "text"},
-        "term_type": {"type": "keyword"},
         "page_num": {"type": "integer"},
         "description": {"type": "text"},
         "description_uri": {"type": "keyword"},
@@ -64,18 +62,18 @@ mappings = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    gazetteers_dataframe = pd.read_json("ingest_data/gazetteers_kg_nls_dataframe", orient="index")
-    gazetteers_dataframe["year_published"].fillna(-1, inplace=True)
-    gazetteers_dataframe["name"] = gazetteers_dataframe["vol_title"]
+    broadsides_dataframe = pd.read_json("../KG2DF/broadsides_kg_hq_dataframe", orient="index")
+    broadsides_dataframe["year_published"] = broadsides_dataframe["year_published"].fillna(-1)
+    broadsides_dataframe["collection"] = "Broadsides printed in Scotland"
     # Create the index with the defined mapping
     if not client.indices.exists(index=index):
-        client.indices.create(index=index, mappings=mappings, settings=settings)
+        client.indices.create(index=index, settings=settings, mappings=mappings)
 
-    page_list = gazetteers_dataframe.to_dict('records')
-    total = len(page_list)
+    broadsides_list = broadsides_dataframe.to_dict('records')
+    total = len(broadsides_list)
     count = 0
     with tqdm(total=total, desc="Ingestion Progress", unit="step") as pbar:
-        for doc in page_list:
+        for doc in broadsides_list:
             count += 1
             pbar.update(1)
-            client.index(index=index, id=doc["page_uri"], document=doc)
+            client.index(index=index, id=doc["record_uri"], document=doc)

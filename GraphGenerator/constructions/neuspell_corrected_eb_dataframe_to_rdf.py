@@ -67,7 +67,7 @@ def run_task(inputs):
         filename = dataframe["filename"]
         file_path = "source_dataframes/eb/" + filename
         print(f"Parsing dataframe {filename} to graph....")
-        df = pd.read_json(file_path, orient="index")
+        df = pd.read_json(file_path, orient="index", dtype={'MMSID': str})
 
         df.rename(columns={"relatedTerms": "reference_terms", "typeTerm": "termType", "positionPage": "position",
                                "altoXML": "filePath"}, inplace=True)

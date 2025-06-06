@@ -1,20 +1,21 @@
+import json
 import re
 
 import pandas as pd
 from rdflib import Graph, URIRef, RDFS
 from rdflib import Literal, XSD, RDF
 from rdflib.namespace import FOAF, PROV, SDO
+
 from ..utils import hto, name_to_uri_name, frances_information_extraction, defoe, add_software, create_organization, \
-    create_dataset, normalize_name
+    create_dataset_with_id, crm, normalize_name
 
 # Create a new RDFLib Graph
 graph = Graph()
 
-ontology_file = "hto.ttl"
+ontology_file = "hto_v1_infer.ttl"
 graph.parse(ontology_file, format="turtle")
 
 NON_AZ_REGEXP = re.compile("[^A-Za-z0-9]")
-
 
 def create_collection(collection_name, id_name):
     collection = URIRef("https://w3id.org/hto/WorkCollection/" + id_name)
@@ -23,13 +24,14 @@ def create_collection(collection_name, id_name):
     graph.add((collection, hto.name, Literal(collection_name, datatype=XSD.string)))
     return collection
 
-
 def series2rdf(series_info, collection):
     # create triples with general datatype
     series = URIRef("https://w3id.org/hto/Series/" + str(series_info["MMSID"]))
     series_title = str(series_info["serieTitle"])
     graph.add((series, RDF.type, hto.Series))
     graph.add((collection, hto.hadMember, series))
+    # migrate to schema:hasPart
+    graph.add((collection, SDO.hasPart, series))
     graph.add((series, hto.number, Literal(int(series_info["serieNum"]), datatype=XSD.integer)))
     graph.add((series, hto.title, Literal(series_title, datatype=XSD.string)))
     series_sub_title = str(series_info["serieSubTitle"])
@@ -143,14 +145,17 @@ def series2rdf(series_info, collection):
     return series
 
 
-def volume2rdf(volume_info, series):
+def broadside2rdf(volume_info, series):
     volume_id = str(volume_info["volumeId"])
-    volume = URIRef("https://w3id.org/hto/Volume/" + str(volume_info["MMSID"]) + "_" + str(volume_id))
+    volume = URIRef("https://w3id.org/hto/Broadside/" + str(volume_info["MMSID"]) + "_" + str(volume_id))
     graph.add((volume, RDF.type, hto.Volume))
+    graph.add((volume, RDF.type, hto.Broadside))
     graph.add((volume, hto.number, Literal(volume_info["volumeNum"], datatype=XSD.integer)))
     graph.add((volume, hto.volumeId, Literal(volume_id, datatype=XSD.string)))
     graph.add((volume, hto.title, Literal(volume_info["volumeTitle"], datatype=XSD.string)))
-
+    graph.add((volume, hto.name, Literal(volume_info["volumeTitle"], datatype=XSD.string)))
+    # migrate to rdfs:label
+    graph.add((volume, RDFS.label, Literal(volume_info["volumeTitle"], datatype=XSD.string)))
     if volume_info["part"] != 0:
         graph.add((volume, hto.part, Literal(volume_info["part"], datatype=XSD.integer)))
 
@@ -161,30 +166,63 @@ def volume2rdf(volume_info, series):
     graph.add((series, RDF.type, hto.WorkCollection))
     graph.add((series, hto.hadMember, volume))
     graph.add((volume, hto.wasMemberOf, series))
+    # migrate to schema:hasPart
+    graph.add((series, SDO.hasPart, volume))
+    graph.add((volume, SDO.isPartOf, series))
 
     return volume
 
 
-def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
+def add_page_image_urls(page_image_urls, graph):
+    for volume_id in page_image_urls:
+        mmsid = page_image_urls[volume_id]['mmsid']
+        if mmsid is None:
+            continue
+        page_urls = page_image_urls[volume_id]['pages']
+        for page in page_urls:
+            image_url = page['image_url']
+            page_num = page['number']
+            page_uri_ref = URIRef("https://w3id.org/hto/Page/" + mmsid + "_" + volume_id + "_" + str(page_num))
+            if (page_uri_ref, RDF.type, hto.Page) not in graph:
+                graph.add((page_uri_ref, RDF.type, hto.Page))
+                graph.add((page_uri_ref, hto.number, Literal(int(page_num), datatype=XSD.integer)))
+            image_ref = URIRef(image_url)
+            if volume_id == "74459389":
+                # <https://w3id.org/hto/Page/9939131773804340_74459389_1>
+                #  https://w3id.org/hto/Page/9939131773804341_74459389_1
+                print(f"adding page image {image_url} for volume {volume_id}, page uri {page_uri_ref}")
+            graph.add((image_ref, RDF.type, hto.Image))
+            graph.add((page_uri_ref, crm.P138i_has_representation, image_ref))
+
+
+def dataframe_to_rdf(collection, dataframe, agent_uri, agent, broadside_full_dataset, broadside_text_dataset):
     dataframe = dataframe.fillna(0)
     # create triples
     series_mmsids = dataframe["MMSID"].unique()
+
+    print(series_mmsids)
     for mmsid in series_mmsids:
         df_series = dataframe[dataframe["MMSID"] == mmsid].reset_index(drop=True)
-        edition_info = df_series.loc[0]
+        series_info = df_series.loc[0]
+        if mmsid == 9939131773804340 or mmsid == 9939131773804341:
+            print(f"df series mmsid: {series_info['MMSID']}, mmsid: {mmsid}")
         #print(edition_info["serieTitle"])
-        edition_ref = series2rdf(edition_info, collection)
+        series_ref = series2rdf(series_info, collection)
 
-        # VOLUMES
+        # Broadsides
         vol_numbers = df_series["volumeNum"].unique()
         # graph.add((edition_ref, hto.numberOfVolumes, Literal(len(vol_numbers), datatype=XSD.integer)))
         for vol_number in vol_numbers:
             df_vol = df_series[df_series["volumeNum"] == vol_number].reset_index(drop=True)
             volume_info = df_vol.loc[0]
-            volume_ref = volume2rdf(volume_info, edition_ref)
+            volume_id = str(volume_info["volumeId"])
+            if volume_id == "74459389":
+                print(f"mmsid {mmsid} volume {volume_id} volume number {vol_number}" )
+            volume_ref = broadside2rdf(volume_info, series_ref)
             # print(volume_info)
 
             #### Pages
+            pages = []
             for df_vol_index in range(0, len(df_vol)):
                 df_page = df_vol.loc[df_vol_index]
                 page_num = int(df_page["pageNum"])
@@ -192,16 +230,8 @@ def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
                 page_uri = URIRef("https://w3id.org/hto/Page/" + page_id)
                 graph.add((page_uri, RDF.type, hto.Page))
                 graph.add((page_uri, hto.number, Literal(page_num, datatype=XSD.integer)))
-
-                # Create original description for the page
-                description = str(df_page["text"])
-                page_original_description = URIRef("https://w3id.org/hto/OriginalDescription/" + page_id + agent)
-                graph.add((page_original_description, RDF.type, hto.OriginalDescription))
-                graph.add((page_original_description, hto.hasTextQuality, hto.Low))
-                graph.add((page_original_description, hto.text, Literal(description, datatype=XSD.string)))
-                graph.add((page_uri, hto.hasOriginalDescription, page_original_description))
                 graph.add((volume_ref, hto.hadMember, page_uri))
-                graph.add((page_original_description, PROV.wasAttributedTo, frances_information_extraction))
+                graph.add((volume_ref, hto.hasPart, page_uri))
 
                 # Create source entity where original description was extracted
                 # source location
@@ -214,12 +244,10 @@ def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
                 source_ref = URIRef("https://w3id.org/hto/InformationResource/" + source_name)
                 graph.add((source_ref, RDF.type, hto.InformationResource))
                 graph.add((source_ref, PROV.value, Literal(source_filepath, datatype=XSD.string)))
-                graph.add((chapbook_dataset, hto.hadMember, source_ref))
+                graph.add((broadside_full_dataset, hto.hadMember, source_ref))
                 # graph.add((source_ref, PROV.atLocation, source_path_ref))
                 # related agent and activity
                 graph.add((source_ref, PROV.wasAttributedTo, agent_uri))
-                graph.add((source_ref, PROV.wasAttributedTo, defoe))
-
                 """
                 source_digitalising_activity = URIRef("https://w3id.org/eb/Activity/nls_digitalising_activity" + source_name)
                 graph.add((source_digitalising_activity, RDF.type, PROV.Activity))
@@ -227,34 +255,81 @@ def dataframe_to_rdf(collection, dataframe, agent_uri, agent, chapbook_dataset):
                 graph.add((source_digitalising_activity, PROV.wasAssociatedWith, nls))
                 graph.add((source_ref, PROV.wasGeneratedBy, source_digitalising_activity))
                 """
-                graph.add((page_original_description, hto.wasExtractedFrom, source_ref))
+                pages.append({
+                    "uri": page_uri,
+                    "text": str(df_page["text"]),
+                    "source_ref": source_ref
+                })
+
+            # add start page and end page
+            graph.add((volume_ref, hto.startsAtPage, pages[0]['uri']))
+            graph.add((volume_ref, hto.endsAtPage, pages[-1]['uri']))
+
+            # combine text from each pages
+            lq_text = '\n'.join([page['text'] for page in pages])
+            broadside_lq_description = URIRef("https://w3id.org/hto/OriginalDescription/" + volume_id + agent)
+            graph.add((broadside_lq_description, RDF.type, hto.OriginalDescription))
+            graph.add((broadside_lq_description, hto.hasTextQuality, hto.Low))
+            graph.add((broadside_lq_description, hto.text, Literal(lq_text, datatype=XSD.string)))
+            graph.add((volume_ref, hto.hasOriginalDescription, broadside_lq_description))
+            graph.add((broadside_lq_description, PROV.wasAttributedTo, frances_information_extraction))
+            for page in pages:
+                graph.add((broadside_lq_description, hto.wasExtractedFrom, page['source_ref']))
+
+            if volume_info['corrected_text'] != "None":
+                corrected_text = volume_info['corrected_text']
+                broadside_hq_description = URIRef("https://w3id.org/hto/OriginalDescription/" + volume_id + agent + '_Corrected')
+                graph.add((broadside_hq_description, RDF.type, hto.OriginalDescription))
+                graph.add((broadside_hq_description, hto.hasTextQuality, hto.High))
+                graph.add((broadside_hq_description, hto.text, Literal(corrected_text, datatype=XSD.string)))
+                graph.add((volume_ref, hto.hasOriginalDescription, broadside_hq_description))
+                graph.add((broadside_hq_description, PROV.wasAttributedTo, frances_information_extraction))
+
+                hq_source_filepath = volume_id + ".txt"
+                hq_source_name = hq_source_filepath.replace("/", "_").replace(".", "_")
+                hq_source_ref = URIRef("https://w3id.org/hto/InformationResource/" + hq_source_name)
+                graph.add((hq_source_ref, RDF.type, hto.InformationResource))
+                graph.add((hq_source_ref, PROV.value, Literal(hq_source_filepath, datatype=XSD.string)))
+                graph.add((broadside_text_dataset, hto.hadMember, hq_source_ref))
+                # graph.add((source_ref, PROV.atLocation, source_path_ref))
+                # related agent and activity
+                graph.add((hq_source_ref, PROV.wasAttributedTo, agent_uri))
+                graph.add((broadside_hq_description, hto.wasExtractedFrom, hq_source_ref))
+            else:
+                print("Here")
 
     return graph
 
 
 def run_task(inputs):
-    print("---- Start the nls dataframe to rdf task ----")
-    nls_dataframes = inputs["dataframes"]
+    print("---- Start the broadside dataframe to rdf task ----")
+    broadside_dataframes = inputs["dataframes"]
     # dataframe = [{"agent": "NLS", "filename": ""}]
     collection_name = inputs["collection_name"]
     collection_id_name = re.sub(NON_AZ_REGEXP, '', collection_name)
     collection = create_collection(collection_name, collection_id_name)
     # add software agents to graph
-    software_list = [defoe, frances_information_extraction]
+    software_list = [frances_information_extraction]
     add_software(software_list, graph)
 
-    for dataframe in nls_dataframes:
+    for dataframe in broadside_dataframes:
         filename = dataframe["filename"]
         file_path = "source_dataframes/" + filename
         print(f"Parsing dataframe {filename} to graph....")
         agent = dataframe["agent"]
         agent_uri = create_organization(agent, graph)
-        eb_dataset = create_dataset(collection_id_name, agent_uri, agent, graph)
         df = pd.read_json(file_path, orient="index", dtype={'MMSID': str})
-
-        dataframe_to_rdf(collection, df, agent_uri, agent, eb_dataset)
+        # create datasets
+        broadside_full_dataset = create_dataset_with_id(agent + "_" + collection_id_name + "_dataset", agent_uri, graph)
+        broadside_text_dataset = create_dataset_with_id(agent + "_" + collection_id_name + "_text_dataset",agent_uri, graph)
+        dataframe_to_rdf(collection, df, agent_uri, agent, broadside_full_dataset, broadside_text_dataset)
 
         print(f"Finished parsing dataframe {filename} to graph!")
+
+    # add page images urls
+    page_images_urls_filename = "source_dataframes/" + inputs["pages_images_uris_filename"]
+    page_images_urls = json.loads(open(page_images_urls_filename, "r").read())
+    add_page_image_urls(page_images_urls, graph)
 
     # Save the Graph in the RDF Turtle format
     result_graph_filename = inputs["results_filenames"]["graph"]

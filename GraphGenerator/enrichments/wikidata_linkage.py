@@ -8,10 +8,6 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
 
-model = SentenceTransformer('all-mpnet-base-v2')
-model._first_module().max_seq_length = 509
-
-
 def invert_name(name: str) -> str:
     """
     Inverts a name from the format 'Last, Prefix' to 'Prefix Last'.
@@ -76,7 +72,7 @@ def get_most_similar_item(query_embedding, wiki_items):
     return score, wiki_items[most_similar_index]
 
 
-def link_wikidata_with_concept(df):
+def link_wikidata_with_concept(df, model):
     concept_uris = df["concept_uri"].unique()
     all_searched_wiki_items = {}
     concept_wiki_item_list = []
@@ -115,7 +111,6 @@ def link_wikidata_with_concept(df):
                     "concept_uri": concept_uri,
                     "item_uri":  most_similar_wiki_item["uri"],
                     "item_description": most_similar_wiki_item["description"],
-                    "similar_score": score,
                     "embedding": most_similar_wiki_item["embedding"]
                 })
 
@@ -123,11 +118,13 @@ def link_wikidata_with_concept(df):
 
 
 def run_task(inputs):
+    model = SentenceTransformer('all-mpnet-base-v2')
+    model._first_module().max_seq_length = 509
     print("Reading the source dataframe .....")
     eb_kg_df_filename = inputs["dataframe"]["filename"]
     eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
     print("Linking wikidata items.......")
-    exception_concept_uris, concept_wiki_item_list = link_wikidata_with_concept(eb_kg_df)
+    exception_concept_uris, concept_wiki_item_list = link_wikidata_with_concept(eb_kg_df, model)
     concept_wiki_item_df = pd.DataFrame(concept_wiki_item_list)
     result_df_filename = inputs["results_filenames"]["dataframe"]
     print(f"Saving the result to file: {result_df_filename}")

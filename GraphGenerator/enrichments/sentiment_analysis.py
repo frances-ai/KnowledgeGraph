@@ -2,10 +2,8 @@ import pandas as pd
 from transformers import pipeline
 from tqdm.auto import tqdm
 
-sentiment_analysis = pipeline("sentiment-analysis",model="siebert/sentiment-roberta-large-english")
 
-
-def get_sentiment_result(description):
+def get_sentiment_result(description, sentiment_analysis):
     try:
         return sentiment_analysis(description, truncation=True)[0]
     except Exception as e:
@@ -14,12 +12,13 @@ def get_sentiment_result(description):
 
 
 def run_task(inputs):
+    sentiment_analysis = pipeline("sentiment-analysis", model="siebert/sentiment-roberta-large-english")
     eb_kg_df_filename = inputs["dataframe"]["filename"]
     eb_kg_df = pd.read_json(eb_kg_df_filename, orient="index")
 
     tqdm.pandas(desc="Processing sentiment analysis!")
     eb_kg_df["sentiment"] = eb_kg_df['description'].progress_apply(
-        lambda description: get_sentiment_result(description))
+        lambda description: get_sentiment_result(description, sentiment_analysis))
 
     term_sentiment_dataframe = eb_kg_df[['term_uri', 'sentiment']]
     result_df_filename = inputs["results_filenames"]["dataframe"]

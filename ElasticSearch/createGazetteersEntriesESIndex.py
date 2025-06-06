@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "hto_gazetteers"
+index = "test_gazetteers"
 
 settings = {
     "analysis": {
@@ -38,24 +38,35 @@ settings = {
 
 mappings = {
     "properties": {
+        "embedding": {
+            "type": "dense_vector",
+            "similarity": "cosine"
+        },
         "collection": {"type": "constant_keyword", "value": "Gazetteers of Scotland"},
         "series_uri": {"type": "keyword"},
         "vol_num": {"type": "integer"},
         "vol_title": {"type": "keyword"},
         "genre": {"type": "keyword"},
-        "print_location": {"type": "keyword", "null_value": "Unknown" },
-        "year_published": {"type": "integer", "null_value": -1},
+        "print_location": {"type": "keyword"},
+        "year_published": {"type": "integer"},
         "series_num": {"type": "integer"},
         "name": {"type": "text",
                  "fields": {
                      "keyword": {
                          "type": "keyword"
                      }
-                 }
-                 },
+            }
+        },
         "alter_names": {"type": "text"},
-        "term_type": {"type": "keyword"},
-        "page_num": {"type": "integer"},
+        "start_page_num": {"type": "integer"},
+        "end_page_num": {"type": "integer"},
+        "references": {
+            "type": "nested",
+            "properties": {
+                "uri": {"type": "keyword"},
+                "name": {"type": "text"}
+            }
+        },
         "description": {"type": "text"},
         "description_uri": {"type": "keyword"},
     }
@@ -64,18 +75,19 @@ mappings = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    gazetteers_dataframe = pd.read_json("ingest_data/gazetteers_kg_nls_dataframe", orient="index")
-    gazetteers_dataframe["year_published"].fillna(-1, inplace=True)
-    gazetteers_dataframe["name"] = gazetteers_dataframe["vol_title"]
+    gazetteers_dataframe = pd.read_json("gaz_kg_df_with_embeddings", orient="index")
+    gazetteers_dataframe["year_published"] = gazetteers_dataframe["year_published"].fillna(-1)
+    gazetteers_dataframe.rename(columns={"record_name": "name"}, inplace=True)
+    gazetteers_dataframe["collection"] = "Gazetteers of Scotland"
     # Create the index with the defined mapping
     if not client.indices.exists(index=index):
         client.indices.create(index=index, mappings=mappings, settings=settings)
 
-    page_list = gazetteers_dataframe.to_dict('records')
-    total = len(page_list)
+    record_list = gazetteers_dataframe.to_dict('records')
+    total = len(record_list)
     count = 0
     with tqdm(total=total, desc="Ingestion Progress", unit="step") as pbar:
-        for doc in page_list:
+        for doc in record_list:
             count += 1
             pbar.update(1)
-            client.index(index=index, id=doc["page_uri"], document=doc)
+            client.index(index=index, id=doc["record_uri"], document=doc)

@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "chapbooks_test"
+index = "hto_chapbooks"
 
 settings = {
     "analysis": {
@@ -52,9 +52,7 @@ mappings = {
                              "type": "keyword"
                          }
                      }
-                     },
-            "alter_names": {"type": "text"},
-            "term_type": {"type": "keyword"},
+                    },
             "page_num": {"type": "integer"},
             "description": {"type": "text"},
             "description_uri": {"type": "keyword"},

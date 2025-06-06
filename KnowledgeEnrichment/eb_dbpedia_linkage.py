@@ -42,9 +42,12 @@ dbpedia_sparql = SPARQLWrapper(endpoint=dbpedia_endpoint_url, agent=user_agent)
 
 def get_dbpedia_item_by_name(item_name):
     # Inverts a name from the format 'Last, Prefix' to 'Prefix Last'.
-    item_name = invert_name(item_name)
     items = []
     item_valid_names = [item_name.title(), item_name.lower()]
+    inverted_name = invert_name(item_name)
+    if inverted_name != item_name:
+        item_valid_names.append(inverted_name.title())
+        item_valid_names.append(inverted_name.lower())
     for item_valid_name in item_valid_names:
         wd_term_search_query = """
             SELECT * WHERE {
@@ -79,7 +82,7 @@ def get_most_similar_item(query_embedding, dbpedia_items):
 def link_dbpedia_with_concept(df):
     concept_uris = df["concept_uri"].unique()
     all_searched_dbpedia_items = {}
-    concept_dbpedia_item_list = []
+    concept_dbpedia_items = {}
     exception_concept_uris = []
     for concept_uri in tqdm(concept_uris):
         terms_df = df[df["concept_uri"] == concept_uri]
@@ -110,25 +113,40 @@ def link_dbpedia_with_concept(df):
         if len(dbpedia_items) > 0:
             score, most_similar_dbpedia_item = get_most_similar_item(embedding, dbpedia_items)
             #print(most_similar_wiki_item["description"])
-            if score > 0:
-                concept_dbpedia_item_list.append({
-                    "concept_uri": concept_uri,
-                    "item_uri":  most_similar_dbpedia_item["uri"],
-                    "item_description": most_similar_dbpedia_item["description"],
-                    "similar_score": score,
-                    "embedding": most_similar_dbpedia_item["embedding"]
-                })
+            item_uri = most_similar_dbpedia_item["uri"]
+            if score > 0.4:
+                # check if wiki item has been added
+                if item_uri in concept_dbpedia_items:
+                    existing_dbpedia_item_record = concept_dbpedia_items[item_uri]
+                    if existing_dbpedia_item_record["max_score"] < score:
+                        concept_dbpedia_items[item_uri] = {
+                            "concept_uri": concept_uri,
+                            "item_uri": item_uri,
+                            "item_description": most_similar_dbpedia_item["description"],
+                            "max_score": score,
+                            "embedding": most_similar_dbpedia_item["embedding"]
+                        }
+                else:
+                    concept_dbpedia_items[item_uri] = {
+                        "concept_uri": concept_uri,
+                        "item_uri": item_uri,
+                        "item_description": most_similar_dbpedia_item["description"],
+                        "max_score": score,
+                        "embedding": most_similar_dbpedia_item["embedding"]
+                    }
 
-    return exception_concept_uris, concept_dbpedia_item_list
+
+    return exception_concept_uris, concept_dbpedia_items
 
 
 if __name__ == "__main__":
     print("Reading the source dataframe .....")
     eb_kg_df = pd.read_json("../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
     print("Linking dbpedia items.......")
-    exception_concept_uris, concept_dbpedia_item_list = link_dbpedia_with_concept(eb_kg_df)
+    exception_concept_uris, concept_dbpedia_items = link_dbpedia_with_concept(eb_kg_df)
+    concept_dbpedia_item_list = list(concept_dbpedia_items.values())
     concept_dbpedia_item_df = pd.DataFrame(concept_dbpedia_item_list)
-    result_file = "concept_dbpedia_dataframe"
+    result_file = "concept_dbpedia_dataframev2"
     print(f"Saving the result to file: {result_file}")
     concept_dbpedia_item_df.to_json(result_file, orient="index")
     exception_concept_uris_file = "dbpedia_exception_concept_uris.pkl"
