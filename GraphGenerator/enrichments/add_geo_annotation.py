@@ -1,15 +1,10 @@
 import pandas as pd
 from rdflib.namespace import GEO, SDO
 
-from ..utils import load_name_map, save_name_map, name_to_uri_name, normalize_name
+from ..utils import load_name_map, save_name_map, name_to_uri_name, normalize_name, hto, crm, oa
 from rdflib import Graph, Namespace, URIRef, RDF, Literal, RDFS, XSD
 from tqdm import tqdm
 
-
-# define namespaces
-hto = Namespace("https://w3id.org/hto#")
-crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
-oa = Namespace("http://www.w3.org/ns/oa#")
 
 # convert all coordinates in locations to float type
 def convert_coordinates_type(geo_df):
@@ -104,7 +99,7 @@ def add_phenomenal_place(location, added_locations_uris, target_graph):
     """
     # check if this location is already in the target graph
     # this check might not be necessary if uri is constructed based on name and coordinates.
-    normalized_name = normalize_entity_name(location["name"])
+    normalized_name = normalize_name(location["name"])
     location_id = get_location_id(location)
 
     if location_id in added_locations_uris:
@@ -195,11 +190,11 @@ def add_location_annotation(location, term_uri_str, desc_uri_str, added_location
     return location_annotation_uri
 
 
-def annotate(geo_df, target_graph):
+def annotate(geo_df, target_graph, added_locations_uris):
     for index, row in tqdm(geo_df.iterrows(), total=len(geo_df)):
         record_uri_str = row["record_uri"]
         record_uri = URIRef(record_uri_str)
-        location_name = normalize_entity_name(row["name"])
+        location_name = normalize_name(row["name"])
         c_location = {
             "name": location_name,
             "latitude": row["latitude"],
@@ -216,17 +211,17 @@ def annotate(geo_df, target_graph):
             add_location_annotation(location, record_uri_str, desc_uri_str, added_locations_uris, target_graph)
 
 
-if __name__ == "__main__":
+def run_task(inputs):
     # Load the geo dataframe
     print("Loading georesolved articles...")
-    input_gaz_georesolved_articles_filename = "../geoparse/results/georesolved_df.json"
+    input_gaz_georesolved_articles_filename = inputs["dataframe"]["filename"]
     articles_with_geo = pd.read_json(input_gaz_georesolved_articles_filename, orient="records", lines=True)
     print(f"loaded {len(articles_with_geo)} articles")
 
     print("Loading name map pairs....")
     name_map_file = "name_map.pickle"
     load_name_map(name_map_file)
-    from utils import name_map
+    from ..utils import name_map
     print(f"loaded {len(name_map)} pairs")
 
     print("Load base hto ontology...")
@@ -261,7 +256,7 @@ if __name__ == "__main__":
         "label": current_time_label,
         "uri": URIRef("https://w3id.org/hto/E52_Time-Span/" + current_time_label)
     }
-    graph.add((time_span_current["uri"], RDF.type, URIRef("https://w3id.org/hto/E52_Time-Span")))
+    graph.add((time_span_current["uri"], RDF.type, URIRef("http://www.cidoc-crm.org/cidoc-crm/E52_Time-Span")))
     graph.add((time_span_current["uri"], RDFS.label, Literal(current_time_label, datatype=XSD.string)))
 
     # add current time locations
@@ -270,9 +265,9 @@ if __name__ == "__main__":
 
     print("Adding location annotations to graph")
     # adding annotations
-    annotate(articles_with_geo, graph)
+    annotate(articles_with_geo, graph, added_locations_uris)
 
-    graph_result_filename = "results/gaz_locations_annotations.ttl"
+    graph_result_filename = "results/" + inputs["results_filenames"]["graph"]
     print(f"Saving graph to {graph_result_filename}...")
     # save graph
     graph.serialize(destination=graph_result_filename, format="turtle")

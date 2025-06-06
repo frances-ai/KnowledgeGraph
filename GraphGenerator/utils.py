@@ -89,6 +89,7 @@ def load_name_map(filepath):
 hto = Namespace("https://w3id.org/hto#")
 # define namespaces
 crm = Namespace("http://www.cidoc-crm.org/cidoc-crm/")
+oa = Namespace("http://www.w3.org/ns/oa#")
 
 agents = {
     "NCKP": ["Nineteenth-Century Knowledge Project", hto.Organization, 'https://tu-plogan.github.io'],
