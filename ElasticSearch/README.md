@@ -16,7 +16,7 @@ Includes secure certificates generation and service health checks.
 ```
 .
 ├── docker-compose.yml # Full ELK + Beats deployment with TLS
-├── .env # Environment variables (not included here)
+├── .env # Environment variables 
 ├── metricbeat.yml # Metricbeat configuration
 ├── filebeat.yml # Filebeat configuration
 ├── filebeat_ingest_data/ # Optional Filebeat input data
