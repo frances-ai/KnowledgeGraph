@@ -10,7 +10,7 @@ client = Elasticsearch(
     api_key=config.ELASTIC_API_KEY
 )
 
-index = "test_gazetteers"
+index = "hto_gazetteers"
 
 settings = {
     "analysis": {
@@ -75,7 +75,7 @@ mappings = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    gazetteers_dataframe = pd.read_json("gaz_kg_df_with_embeddings", orient="index")
+    gazetteers_dataframe = pd.read_json("ingest_data/gaz_kg_df_with_embeddings", orient="index")
     gazetteers_dataframe["year_published"] = gazetteers_dataframe["year_published"].fillna(-1)
     gazetteers_dataframe.rename(columns={"record_name": "name"}, inplace=True)
     gazetteers_dataframe["collection"] = "Gazetteers of Scotland"
