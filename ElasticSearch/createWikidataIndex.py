@@ -29,7 +29,7 @@ wikidata_mapping = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    concept_wikidata_df = pd.read_json("../KnowledgeEnrichment/concept_wikidata_dataframe_v2", orient="index")
+    concept_wikidata_df = pd.read_json("ingest_data/concept_wikidata_dataframe", orient="index")
     concept_wikidata_df.drop(columns=["max_score"], inplace=True)
 
     # Create the index with the defined mapping

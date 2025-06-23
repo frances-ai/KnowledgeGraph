@@ -28,7 +28,7 @@ mapping = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    concept_df = pd.read_json("../KnowledgeEnrichment/concept_dbpedia_dataframe_v2", orient="index")
+    concept_df = pd.read_json("ingest_data/concept_dbpedia_dataframe", orient="index")
     concept_df.drop(columns=["max_score"], inplace=True)
     # Create the index with the defined mapping
     if not client.indices.exists(index=index):

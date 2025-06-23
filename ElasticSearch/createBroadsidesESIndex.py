@@ -62,7 +62,7 @@ mappings = {
 
 if __name__ == "__main__":
     # Load the dataframe
-    broadsides_dataframe = pd.read_json("../KG2DF/broadsides_kg_hq_dataframe", orient="index")
+    broadsides_dataframe = pd.read_json("ingest_data/broadsides_kg_hq_dataframe", orient="index")
     broadsides_dataframe["year_published"] = broadsides_dataframe["year_published"].fillna(-1)
     broadsides_dataframe["collection"] = "Broadsides printed in Scotland"
     # Create the index with the defined mapping
