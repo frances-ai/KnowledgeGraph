@@ -1,0 +1,19 @@
+services:
+  fuseki:
+    image: ghcr.io/zazuko/fuseki-geosparql
+    container_name: fuseki
+    ports:
+      - "3030:3030"
+    environment:
+      - ADMIN_PASSWORD=pass123
+      - JAVA_OPTS=-Xmx32g
+      - PATH=/opt/java-minimal/bin:$PATH
+    volumes:
+      - fuseki-data:/fuseki
+      - "./kgs:/staging"
+      - "./helpers:/fuseki/helpers"
+    mem_limit: 16gb
+
+volumes:
+  fuseki-data:
+    driver: local

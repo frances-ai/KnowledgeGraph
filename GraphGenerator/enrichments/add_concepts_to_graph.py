@@ -38,28 +38,32 @@ def external_link(concept_item_df, type_uri):
         graph.add((concept_uriref, hto.hadConceptRecord, item_uriref))
 
 
-if __name__ == "__main__":
+def run_task(inputs):
     # add record links
     print("Loading the source dataframe with concept uris .....")
-    df_with_concept_uris = pd.read_json("../../eb_kg_hq_normalised_embeddings_concepts_dataframe", orient="index")
+    df_with_concept_uris_filename = inputs["record_dataframe"]["filename"]
+    df_with_concept_uris = pd.read_json(df_with_concept_uris_filename, orient="index")
     print("Adding links from records to concepts .....")
     record_links(df_with_concept_uris)
     #graph.serialize(format="turtle", destination="gaz_extra_concepts_records_link.ttl")
 
     # add wikidata links
     print("Loading the wikidata items dataframe .....")
-    concept_wiki_df = pd.read_json("../dataframe_with_uris/eb_concept_wikidata_df", orient="index")
+    concept_wiki_df_filename = inputs["wiki_dataframe"]["filename"]
+    concept_wiki_df = pd.read_json(concept_wiki_df_filename, orient="index")
     print("Adding links from wikidata items to concepts .....")
     external_link(concept_wiki_df, hto.Wikidata_Item)
     #graph.serialize(format="turtle", destination="gaz_extra_concepts_wikidata_link.ttl")
 
     # add dbpedia links
     print("Loading the dbpedia items dataframe .....")
-    concept_dbpedia_df = pd.read_json("../dataframe_with_uris/eb_concept_dbpedia_df", orient="index")
+    concept_dbpedia_df_filename = inputs["dbpedia_dataframe"]["filename"]
+    concept_dbpedia_df = pd.read_json(concept_dbpedia_df_filename, orient="index")
     print("Adding links from dbpedia items to concepts .....")
     external_link(concept_dbpedia_df, hto.DBpedia_Item)
 
-    result_graph_filepath = "../../results/eb_extra_concepts_links.ttl"
+    result_df_filename = inputs["results_filenames"]["dataframe"]
+    result_graph_filepath = "results/" + result_df_filename
     print(f"Saving the result graph to {result_graph_filepath} .....")
     graph.serialize(format="turtle", destination=result_graph_filepath)
     print("Done")
